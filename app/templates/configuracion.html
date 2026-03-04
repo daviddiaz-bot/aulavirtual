@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold mb-4">Configuración de Cuenta</h1>
+
+    <div class="row">
+        <!-- Menú Lateral -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group shadow-sm">
+                <a href="#perfil" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                    <i class="fas fa-user me-2"></i> Perfil
+                </a>
+                <a href="#seguridad" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-lock me-2"></i> Seguridad
+                </a>
+                <a href="#notificaciones" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-bell me-2"></i> Notificaciones
+                </a>
+                <a href="#privacidad" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-shield-alt me-2"></i> Privacidad
+                </a>
+                {% if current_user.rol == 'docente' %}
+                <a href="#pagos" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-credit-card me-2"></i> Métodos de Pago
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-9">
+            <div class="tab-content">
+                <!-- Perfil -->
+                <div class="tab-pane fade show active" id="perfil">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Información Personal</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="formPerfil">
+                                <div class="text-center mb-4">
+                                    <img src="{{ current_user.foto_perfil or 'https://via.placeholder.com/120' }}" 
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle mb-3"
+                                         style="width: 120px; height: 120px; object-fit: cover;">
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-camera me-2"></i> Cambiar Foto
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nombre" class="form-label">Nombre Completo</label>
+                                        <input type="text" class="form-control" id="nombre" value="{{ current_user.nombre }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" value="{{ current_user.email }}" readonly>
+                                        <small class="text-muted">El email no puede ser cambiado</small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono" value="{{ current_user.telefono or '' }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Biografía</label>
+                                    <textarea class="form-control" id="bio" rows="4">{{ current_user.bio or '' }}</textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i> Guardar Cambios
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seguridad -->
+                <div class="tab-pane fade" id="seguridad">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Cambiar Contraseña</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="formPassword">
+                                <div class="mb-3">
+                                    <label for="password_actual" class="form-label">Contraseña Actual</label>
+                                    <input type="password" class="form-control" id="password_actual" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password_nueva" class="form-label">Nueva Contraseña</label>
+                                    <input type="password" class="form-control" id="password_nueva" required>
+                                    <small class="text-muted">Mínimo 8 caracteres</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password_confirmar" class="form-label">Confirmar Nueva Contraseña</label>
+                                    <input type="password" class="form-control" id="password_confirmar" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key me-2"></i> Actualizar Contraseña
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Autenticación de Dos Factores (2FA)</h4>
+                            {% if current_user.doble_factor_habilitado %}
+                            <span class="badge bg-success">Activado</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Desactivado</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="text-muted">La autenticación de dos factores añade una capa extra de seguridad a tu cuenta.</p>
+                            {% if current_user.doble_factor_habilitado %}
+                            <a href="{{ url_for('auth.desactivar_2fa') }}" class="btn btn-danger">
+                                <i class="fas fa-times me-2"></i> Desactivar 2FA
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-success">
+                                <i class="fas fa-shield-alt me-2"></i> Activar 2FA
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notificaciones -->
+                <div class="tab-pane fade" id="notificaciones">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Preferencias de Notificaciones</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="formNotificaciones">
+                                <h5 class="mb-3">Email</h5>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="email_clases" checked>
+                                    <label class="form-check-label" for="email_clases">
+                                        Confirmaciones y recordatorios de clases
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="email_mensajes" checked>
+                                    <label class="form-check-label" for="email_mensajes">
+                                        Nuevos mensajes de docentes/estudiantes
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="email_pagos" checked>
+                                    <label class="form-check-label" for="email_pagos">
+                                        Confirmaciones de pagos
+                                    </label>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="email_promociones">
+                                    <label class="form-check-label" for="email_promociones">
+                                        Ofertas y promociones especiales
+                                    </label>
+                                </div>
+
+                                <h5 class="mb-3">Notificaciones Push</h5>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="push_clases" checked>
+                                    <label class="form-check-label" for="push_clases">
+                                        Recordatorios de clases (15 min antes)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="push_mensajes" checked>
+                                    <label class="form-check-label" for="push_mensajes">
+                                        Nuevos mensajes
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i> Guardar Preferencias
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacidad -->
+                <div class="tab-pane fade" id="privacidad">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Configuración de Privacidad</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="formPrivacidad">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="perfil_publico" checked>
+                                    <label class="form-check-label" for="perfil_publico">
+                                        Hacer mi perfil público
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="mostrar_resenas" checked>
+                                    <label class="form-check-label" for="mostrar_resenas">
+                                        Mostrar reseñas en mi perfil
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-4">
+                                    <input class="form-check-input" type="checkbox" id="compartir_estadisticas">
+                                    <label class="form-check-label" for="compartir_estadisticas">
+                                        Compartir estadísticas de uso con la plataforma
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i> Guardar Cambios
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4 class="mb-0">Zona de Peligro</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <h5>Eliminar Cuenta</h5>
+                            <p class="text-muted">Una vez eliminada tu cuenta, toda tu información será permanentemente borrada. Esta acción no se puede deshacer.</p>
+                            <button class="btn btn-danger" onclick="confirmarEliminarCuenta()">
+                                <i class="fas fa-trash me-2"></i> Eliminar Mi Cuenta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métodos de Pago (Solo Docentes) -->
+                {% if current_user.rol == 'docente' %}
+                <div class="tab-pane fade" id="pagos">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Métodos de Retiro</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="text-muted mb-4">Configura cómo deseas recibir tus ganancias</p>
+                            
+                            <form id="formPagos">
+                                <div class="mb-3">
+                                    <label for="metodo_pago" class="form-label">Método Preferido</label>
+                                    <select class="form-select" id="metodo_pago">
+                                        <option value="transferencia">Transferencia Bancaria</option>
+                                        <option value="paypal">PayPal</option>
+                                        <option value="stripe">Stripe</option>
+                                    </select>
+                                </div>
+
+                                <div id="datosBancarios" class="payment-details">
+                                    <h5 class="mb-3">Datos Bancarios</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="banco" class="form-label">Banco</label>
+                                            <input type="text" class="form-control" id="banco">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="cuenta" class="form-label">Número de Cuenta</label>
+                                            <input type="text" class="form-control" id="cuenta">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="titular" class="form-label">Nombre del Titular</label>
+                                            <input type="text" class="form-control" id="titular" value="{{ current_user.nombre }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="identificacion" class="form-label">Identificación Fiscal</label>
+                                            <input type="text" class="form-control" id="identificacion">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Los retiros se procesan semanalmente cada viernes. Monto mínimo: $50
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i> Guardar Información de Pago
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminarCuenta() {
+    if (confirm('¿Estás ABSOLUTAMENTE SEGURO de que desees eliminar tu cuenta? Esta acción NO se puede deshacer.')) {
+        if (confirm('Escribe "ELIMINAR" para confirmar la eliminación de tu cuenta')) {
+            // Aquí iría la lógica de eliminación
+            alert('Funcionalidad de eliminación no implementada en esta demo');
+        }
+    }
+}
+
+// Manejar envío de formularios
+document.getElementById('formPerfil')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Perfil actualizado exitosamente');
+});
+
+document.getElementById('formPassword')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nueva = document.getElementById('password_nueva').value;
+    const confirmar = document.getElementById('password_confirmar').value;
+    
+    if (nueva !== confirmar) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    
+    alert('Contraseña actualizada exitosamente');
+    this.reset();
+});
+
+document.getElementById('formNotificaciones')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Preferencias de notificaciones guardadas');
+});
+
+document.getElementById('formPrivacidad')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Configuración de privacidad actualizada');
+});
+
+document.getElementById('formPagos')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Información de pago guardada');
+});
+</script>
+{% endblock %}

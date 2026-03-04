@@ -1,0 +1,15 @@
+Hola {{ usuario.nombre }},
+
+Tienes una nueva clase reservada:
+
+Estudiante: {{ clase.cliente.nombre }}
+Fecha: {{ clase.fecha_inicio.strftime('%d/%m/%Y') }}
+Hora: {{ clase.fecha_inicio.strftime('%H:%M') }}
+Duración: {{ clase.duracion_minutos }} minutos
+
+Descripción: {{ clase.descripcion or 'Sin descripción' }}
+
+Enlace de videollamada: {{ clase.link_jitsi }}
+
+Saludos,
+{{ app_name }}

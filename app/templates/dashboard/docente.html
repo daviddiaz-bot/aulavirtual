@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Docente - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Dashboard - Docente</h1>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-graduation-cap me-2"></i>Total Clases</h6>
+                    <p class="display-4">{{ total_clases }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-dollar-sign me-2"></i>Ingresos Mes</h6>
+                    <p class="display-4">${{ "%.2f"|format(ingresos_mes) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-star me-2"></i>Calificación</h6>
+                    <p class="display-4">{{ "%.1f"|format(docente.promedio_calificacion) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-clock me-2"></i>Próximas</h6>
+                    <p class="display-4">{{ clases_proximas|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estado del Perfil -->
+    {% if not docente.verificado %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Perfil Pendiente de Verificación</strong> - Tu perfil está siendo revisado por nuestro equipo. Recibirás un correo cuando sea aprobado.
+    </div>
+    {% endif %}
+    
+    <!-- Próximas Clases -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Próximas Clases</h5>
+            <a href="{{ url_for('main.calendario') }}" class="btn btn-sm btn-primary">Ver Calendario</a>
+        </div>
+        <div class="card-body">
+            {% if clases_proximas %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Estudiante</th>
+                            <th>Título</th>
+                            <th>Duración</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for clase in clases_proximas %}
+                        <tr>
+                            <td>{{ clase.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ clase.cliente.nombre }}</td>
+                            <td>{{ clase.titulo }}</td>
+                            <td>{{ clase.duracion_minutos }} min</td>
+                            <td>${{ "%.2f"|format(clase.monto) }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if clase.estado == 'confirmada' else 'warning' }}">
+                                    {{ clase.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('main.detalle_clase', clase_id=clase.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Ver</a>
+                                {% if clase.estado_pago %}
+                                <a href="{{ clase.link_jitsi }}" target="_blank" 
+                                   class="btn btn-sm btn-success">
+                                    <i class="fas fa-video me-1"></i>Iniciar
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes clases programadas</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Acciones Rápidas -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.perfil') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
+                    <h5>Editar Perfil</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.configuracion') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-cog fa-3x text-info mb-2"></i>
+                    <h5>Configuración</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.finanzas') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-success mb-2"></i>
+                    <h5>Finanzas</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

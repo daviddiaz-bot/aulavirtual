@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre Nosotros - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 fw-bold text-center mb-4">Sobre Nosotros</h1>
+            <p class="lead text-center text-muted mb-5">Conectando estudiantes con los mejores docentes del mundo</p>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-5">
+                    <h2 class="h3 mb-4">Nuestra Misión</h2>
+                    <p>En Aula Virtual, creemos que la educación de calidad debe estar al alcance de todos, sin importar dónde se encuentren. Nuestra misión es democratizar el acceso al conocimiento conectando estudiantes con docentes expertos en todo el mundo.</p>
+                    
+                    <h2 class="h3 mb-4 mt-5">Nuestra Historia</h2>
+                    <p>Fundada en 2024, Aula Virtual nació de la necesidad de crear una plataforma educativa que fuera más allá de las limitaciones geográficas. Comenzamos con un pequeño grupo de docentes apasionados y hoy contamos con cientos de profesionales verificados que enseñan en más de 50 especialidades diferentes.</p>
+                    
+                    <h2 class="h3 mb-4 mt-5">Qué Nos Hace Diferentes</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Verificación Rigurosa:</strong> Todos nuestros docentes pasan por un proceso de verificación exhaustivo.
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Flexibilidad Total:</strong> Aprende a tu propio ritmo, en tus propios horarios.
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Calidad Garantizada:</strong> Sistema de calificaciones y reseñas transparente.
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Tecnología de Vanguardia:</strong> Videollamadas HD, pizarras digitales y más.
+                        </li>
+                    </ul>
+
+                    <h2 class="h3 mb-4 mt-5">Nuestros Valores</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h5><i class="fas fa-heart text-danger me-2"></i> Pasión</h5>
+                                <p class="mb-0 small">Amamos lo que hacemos y nos dedicamos a la excelencia educativa.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h5><i class="fas fa-users text-primary me-2"></i> Comunidad</h5>
+                                <p class="mb-0 small">Construimos una comunidad de aprendizaje inclusiva y colaborativa.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h5><i class="fas fa-shield-alt text-success me-2"></i> Confianza</h5>
+                                <p class="mb-0 small">Seguridad y transparencia en cada interacción.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h5><i class="fas fa-rocket text-warning me-2"></i> Innovación</h5>
+                                <p class="mb-0 small">Constantemente mejoramos nuestra tecnología y servicios.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h3 class="mb-4">¿Listo para Empezar?</h3>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-2">Registrarse</a>
+                <a href="{{ url_for('main.como_funciona') }}" class="btn btn-outline-primary btn-lg">Cómo Funciona</a>
+                {% else %}
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">Ir al Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar Docentes - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold text-center mb-4">Encuentra tu Docente Ideal</h1>
+    <p class="lead text-center text-muted mb-5">Explora cientos de profesionales verificados en tu área de interés</p>
+
+    <!-- Filtros de Búsqueda -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ url_for('main.buscar_docentes') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="especialidad" class="form-label">Especialidad</label>
+                    <input type="text" class="form-control" id="especialidad" name="especialidad" 
+                           placeholder="Ej: Matemáticas" value="{{ request.args.get('especialidad', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="precio_min" class="form-label">Precio Mínimo</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="precio_min" name="precio_min" 
+                               step="0.01" value="{{ request.args.get('precio_min', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="precio_max" class="form-label">Precio Máximo</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="precio_max" name="precio_max" 
+                               step="0.01" value="{{ request.args.get('precio_max', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="calificacion" class="form-label">Calificación Mínima</label>
+                    <select class="form-select" id="calificacion" name="calificacion">
+                        <option value="">Todas</option>
+                        <option value="4.5" {% if request.args.get('calificacion') == '4.5' %}selected{% endif %}>4.5+ ⭐</option>
+                        <option value="4.0" {% if request.args.get('calificacion') == '4.0' %}selected{% endif %}>4.0+ ⭐</option>
+                        <option value="3.5" {% if request.args.get('calificacion') == '3.5' %}selected{% endif %}>3.5+ ⭐</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row">
+        {% if docentes %}
+            <div class="col-12 mb-3">
+                <p class="text-muted">Mostrando <strong>{{ docentes|length }}</strong> docentes</p>
+            </div>
+            {% for docente in docentes %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card teacher-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-3">
+                            <img src="{{ docente.usuario.foto_perfil or 'https://via.placeholder.com/60' }}" 
+                                 alt="{{ docente.usuario.nombre }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">{{ docente.usuario.nombre }}</h5>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-book me-1"></i> {{ docente.especialidad }}
+                                </p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-warning text-dark me-2">
+                                        <i class="fas fa-star"></i> {{ "%.1f"|format(docente.calificacion_promedio or 0) }}
+                                    </span>
+                                    <small class="text-muted">({{ docente.total_resenas or 0 }} reseñas)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="card-text small text-muted mb-3">
+                            {{ docente.descripcion[:120] }}{% if docente.descripcion|length > 120 %}...{% endif %}
+                        </p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">
+                                <i class="fas fa-graduation-cap me-1"></i> {{ docente.experiencia or 'N/A' }}
+                            </span>
+                            <span class="fw-bold text-primary fs-5">
+                                ${{ "%.2f"|format(docente.precio_hora) }}/hr
+                            </span>
+                        </div>
+                        
+                        <a href="{{ url_for('main.perfil_docente', docente_id=docente.id) }}" 
+                           class="btn btn-primary w-100">
+                            Ver Perfil Completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h3>No se encontraron docentes</h3>
+                    <p class="text-muted">Intenta ajustar tus filtros de búsqueda</p>
+                    <a href="{{ url_for('main.buscar_docentes') }}" class="btn btn-outline-primary">
+                        Ver Todos los Docentes
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.teacher-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.teacher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

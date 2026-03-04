@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Calendario - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold">Mi Calendario</h1>
+        {% if current_user.rol == 'docente' %}
+        <a href="{{ url_for('main.configurar_disponibilidad') }}" class="btn btn-outline-primary">
+            <i class="fas fa-cog me-2"></i> Configurar Disponibilidad
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Filtrar por Estado</label>
+                    <select class="form-select" id="filtroEstado">
+                        <option value="todas">Todas las Clases</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="confirmada">Confirmadas</option>
+                        <option value="completada">Completadas</option>
+                        <option value="cancelada">Canceladas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Desde</label>
+                    <input type="date" class="form-control" id="fechaDesde">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" class="form-control" id="fechaHasta">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Clases -->
+    <div class="row">
+        {% if clases %}
+            {% for clase in clases|sort(attribute='fecha_inicio', reverse=True) %}
+            <div class="col-12 mb-3 clase-item" data-estado="{{ clase.estado }}">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <!-- Fecha y Hora -->
+                            <div class="col-md-2 text-center border-end">
+                                <div class="calendar-date">
+                                    <div class="month text-primary">{{ clase.fecha_inicio.strftime('%b') if clase.fecha_inicio else 'N/A' }}</div>
+                                    <div class="day display-6 fw-bold">{{ clase.fecha_inicio.strftime('%d') if clase.fecha_inicio else '-' }}</div>
+                                    <div class="time text-muted">{{ clase.fecha_inicio.strftime('%H:%M') if clase.fecha_inicio else '-' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Información de la Clase -->
+                            <div class="col-md-6">
+                                {% if current_user.rol == 'docente' %}
+                                <h5 class="mb-2">Clase con {{ clase.cliente.nombre if clase.cliente else 'Cliente' }}</h5>
+                                {% else %}
+                                <h5 class="mb-2">Clase de {{ clase.docente.especialidad if clase.docente else 'Docente' }}</h5>
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                                    {{ clase.docente.usuario.nombre if clase.docente and clase.docente.usuario else 'Docente' }}
+                                </p>
+                                {% endif %}
+                                
+                                <div class="d-flex gap-3">
+                                    <span class="text-muted">
+                                        <i class="fas fa-clock me-1"></i> 
+                                        {{ clase.duracion_minutos or 60 }} minutos
+                                    </span>
+                                    <span class="text-muted">
+                                        <i class="fas fa-dollar-sign me-1"></i> 
+                                        ${{ "%.2f"|format(clase.precio or 0) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Estado y Acciones -->
+                            <div class="col-md-4 text-end">
+                                {% if clase.estado == 'confirmada' %}
+                                <span class="badge bg-success mb-3">Confirmada</span>
+                                {% elif clase.estado == 'pendiente' %}
+                                <span class="badge bg-warning text-dark mb-3">Pendiente</span>
+                                {% elif clase.estado == 'completada' %}
+                                <span class="badge bg-info mb-3">Completada</span>
+                                {% elif clase.estado == 'cancelada' %}
+                                <span class="badge bg-danger mb-3">Cancelada</span>
+                                {% endif %}
+
+                                <div class="d-flex flex-column gap-2">
+                                    {% if clase.estado == 'confirmada' %}
+                                        {% if clase.fecha_inicio and clase.fecha_inicio <= datetime.now() + timedelta(minutes=15) %}
+                                        <a href="{{ url_for('main.unirse_clase', clase_id=clase.id) }}" 
+                                           class="btn btn-success btn-sm animate-pulse">
+                                            <i class="fas fa-video me-2"></i> Unirse a Clase
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    <a href="{{ url_for('main.detalle_clase', clase_id=clase.id) }}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-2"></i> Ver Detalles
+                                    </a>
+                                    
+                                    {% if clase.estado in ['pendiente', 'confirmada'] %}
+                                        {% if clase.fecha_inicio and clase.fecha_inicio > datetime.now() + timedelta(hours=24) %}
+                                        <button class="btn btn-outline-danger btn-sm" 
+                                                onclick="cancelarClase({{ clase.id }})">
+                                            <i class="fas fa-times me-2"></i> Cancelar
+                                        </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
+                        <h3>No hay clases programadas</h3>
+                        {% if current_user.rol == 'estudiante' %}
+                        <p class="text-muted mb-4">Comienza a explorar docentes y reserva tu primera clase</p>
+                        <a href="{{ url_for('main.buscar_docentes') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i> Buscar Docentes
+                        </a>
+                        {% elif current_user.rol == 'docente' %}
+                        <p class="text-muted mb-4">Configura tu disponibilidad para empezar a recibir solicitudes</p>
+                        <a href="{{ url_for('main.configurar_disponibilidad') }}" class="btn btn-primary">
+                            <i class="fas fa-cog me-2"></i> Configurar Disponibilidad
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.calendar-date .month {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.calendar-date .day {
+    line-height: 1;
+    margin: 5px 0;
+}
+
+.calendar-date .time {
+    font-size: 0.9rem;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+</style>
+
+<script>
+// Filtrar clases por estado
+document.getElementById('filtroEstado').addEventListener('change', function() {
+    const estado = this.value;
+    const clases = document.querySelectorAll('.clase-item');
+    
+    clases.forEach(clase => {
+        if (estado === 'todas' || clase.dataset.estado === estado) {
+            clase.style.display = 'block';
+        } else {
+            clase.style.display = 'none';
+        }
+    });
+});
+
+// Función para cancelar clase
+function cancelarClase(claseId) {
+    if (confirm('¿Estás seguro de que deseas cancelar esta clase? Revisa la política de reembolsos.')) {
+        fetch(`/clase/${claseId}/cancelar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Clase cancelada exitosamente');
+                location.reload();
+            } else {
+                alert('Error al cancelar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error al cancelar la clase');
+            console.error(error);
+        });
+    }
+}
+</script>
+{% endblock %}

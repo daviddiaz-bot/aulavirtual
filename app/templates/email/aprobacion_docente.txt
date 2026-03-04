@@ -1,0 +1,16 @@
+¡Felicidades {{ usuario.nombre }}!
+
+Tu perfil de docente ha sido aprobado.
+
+Ya puedes comenzar a recibir reservas de estudiantes en nuestra plataforma.
+
+Para aparecer en las búsquedas, asegúrate de completar toda la información de tu perfil incluyendo:
+- Descripción y especialidad
+- Experiencia y educación
+- Precio por hora
+- Disponibilidad
+
+¡Bienvenido al equipo de docentes de {{ app_name }}!
+
+Saludos,
+El equipo de {{ app_name }}

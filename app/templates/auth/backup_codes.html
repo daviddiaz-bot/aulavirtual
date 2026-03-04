@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Códigos de Respaldo 2FA - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Códigos de Respaldo</h2>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>¡Importante!</strong> Guarda estos códigos en un lugar seguro. Cada código solo se puede usar una vez.
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded mb-4">
+                        <div class="row">
+                            {% for code in backup_codes %}
+                            <div class="col-6 mb-2">
+                                <code class="fs-5">{{ code }}</code>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button onclick="printCodes()" class="btn btn-outline-primary">
+                            <i class="fas fa-print me-2"></i>Imprimir Códigos
+                        </button>
+                        <a href="{{ url_for('main.configuracion') }}" class="btn btn-primary">
+                            He guardado mis códigos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function printCodes() {
+    window.print();
+}
+</script>
+{% endblock %}

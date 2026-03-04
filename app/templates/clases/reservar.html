@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Reservar Clase - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-plus me-2"></i>Reservar Clase</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">Título de la Clase</label>
+                            <input type="text" class="form-control" id="titulo" name="titulo" 
+                                   value="Clase de {{ docente.especialidad }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción / Temas a tratar</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" 
+                                      rows="3" placeholder="Describe qué te gustaría aprender en esta clase"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha" class="form-label">Fecha</label>
+                                <input type="date" class="form-control" id="fecha" name="fecha" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hora" class="form-label">Hora</label>
+                                <input type="time" class="form-control" id="hora" name="hora" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="duracion" class="form-label">Duración</label>
+                            <select class="form-select" id="duracion" name="duracion" required onchange="calcularMonto()">
+                                <option value="60">1 hora (60 min)</option>
+                                <option value="90">1.5 horas (90 min)</option>
+                                <option value="120">2 horas (120 min)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>Precio por hora:</strong> ${{ "%.2f"|format(docente.precio_hora) }}<br>
+                            <strong id="monto_total">Monto total:</strong> $<span id="monto_valor">{{ "%.2f"|format(docente.precio_hora) }}</span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>Continuar al Pago
+                            </button>
+                            <a href="{{ url_for('main.perfil_docente', docente_id=docente.id) }}" 
+                               class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Información del Docente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if docente.usuario.avatar_url %}
+                        <img src="{{ docente.usuario.avatar_url }}" class="rounded-circle" width="100" height="100">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-5x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="text-center">{{ docente.usuario.nombre }}</h5>
+                    <p class="text-center text-muted">{{ docente.especialidad }}</p>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        <strong>{{ "%.1f"|format(docente.promedio_calificacion) }}</strong> 
+                        ({{ docente.total_resenas }} reseñas)
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        {{ docente.total_clases }} clases impartidas
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        ${{ "%.2f"|format(docente.precio_hora) }} por hora
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Establecer fecha mínima como hoy
+document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
+
+function calcularMonto() {
+    const duracion = parseInt(document.getElementById('duracion').value);
+    const precioHora = {{ docente.precio_hora }};
+    const monto = (duracion / 60) * precioHora;
+    document.getElementById('monto_valor').textContent = monto.toFixed(2);
+}
+</script>
+{% endblock %}

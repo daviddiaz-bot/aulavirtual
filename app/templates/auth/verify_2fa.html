@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Verificación 2FA - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Autenticación de Dos Factores</h2>
+                    <p class="text-center text-muted mb-4">Ingresa el código de 6 dígitos de tu aplicación de autenticación</p>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="use_backup" value="0" id="use_backup_field">
+                        
+                        <div class="mb-4">
+                            <label for="token" class="form-label">Código de Verificación</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="token" name="token" maxlength="6" pattern="[0-9]{6}" 
+                                   autocomplete="off" required autofocus>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Verificar</button>
+                    </form>
+                    
+                    <div class="text-center">
+                        <button type="button" class="btn btn-link" onclick="showBackupCodeForm()">
+                            Usar código de respaldo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showBackupCodeForm() {
+    if (confirm('¿Deseas usar un código de respaldo? Los códigos de respaldo solo se pueden usar una vez.')) {
+        document.getElementById('use_backup_field').value = '1';
+        document.getElementById('token').placeholder = 'Código de respaldo';
+        document.getElementById('token').removeAttribute('pattern');
+        document.getElementById('token').removeAttribute('maxlength');
+    }
+}
+</script>
+{% endblock %}

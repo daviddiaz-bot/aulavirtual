@@ -1,0 +1,11 @@
+Reporte Diario - {{ fecha.strftime('%d/%m/%Y') }}
+
+Actividad del día:
+
+- Clases realizadas: {{ clases }}
+- Nuevos usuarios: {{ usuarios }}
+- Ingresos generados: ${{ "%.2f"|format(ingresos) }}
+
+Este es un reporte automático generado por el sistema.
+
+{{ app_name }}

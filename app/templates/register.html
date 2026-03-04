@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h3 class="fw-bold">Crear Cuenta</h3>
+                        <p class="text-muted">Únete a la comunidad de Aula Virtual</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre Completo</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Juan Pérez">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="tu@email.com">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required 
+                                       placeholder="Mínimo 8 caracteres" minlength="8">
+                            </div>
+                            <small class="text-muted">Usa al menos 8 caracteres con letras y números</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required 
+                                       placeholder="Repite tu contraseña">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="rol" class="form-label">¿Cómo quieres usar Aula Virtual?</label>
+                            <select class="form-select" id="rol" name="rol" required>
+                                <option value="">Selecciona una opción...</option>
+                                <option value="estudiante">Soy Estudiante - Quiero aprender</option>
+                                <option value="docente">Soy Docente - Quiero enseñar</option>
+                            </select>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input type="checkbox" class="form-check-input" id="terminos" required>
+                            <label class="form-check-label" for="terminos">
+                                Acepto los <a href="{{ url_for('main.terminos') }}" target="_blank">Términos y Condiciones</a> 
+                                y la <a href="{{ url_for('main.privacidad') }}" target="_blank">Política de Privacidad</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle"></i> Crear Mi Cuenta
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">¿Ya tienes una cuenta?</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary mt-2">
+                            Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+}
+
+.input-group-text {
+    background-color: var(--light-color);
+    border-right: none;
+}
+
+.input-group .form-control,
+.input-group .form-select {
+    border-left: none;
+}
+
+.form-select {
+    padding-left: 10px;
+}
+</style>
+
+<script>
+// Validar que las contraseñas coincidan
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Las contraseñas no coinciden. Por favor verifica.');
+        document.getElementById('confirm_password').focus();
+    }
+});
+</script>
+{% endblock %}

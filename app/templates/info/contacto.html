@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Contacto - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 fw-bold text-center mb-4">Contáctanos</h1>
+            <p class="lead text-center text-muted mb-5">Estamos aquí para ayudarte. Envíanos tu mensaje y te responderemos pronto.</p>
+
+            <div class="row mb-5">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                            <h5>Email</h5>
+                            <p class="text-muted mb-0">soporte@aulavirtual.com<br>info@aulavirtual.com</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-phone fa-3x text-success mb-3"></i>
+                            <h5>Teléfono</h5>
+                            <p class="text-muted mb-0">+1 (555) 123-4567<br>Lun-Vie 9am-6pm</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                            <h5>Ubicación</h5>
+                            <p class="text-muted mb-0">123 Education Street<br>San Francisco, CA 94102</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">Envíanos un Mensaje</h3>
+                    <form id="contactForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="asunto" class="form-label">Asunto *</label>
+                            <input type="text" class="form-control" id="asunto" name="asunto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo de Consulta *</label>
+                            <select class="form-select" id="tipo" name="tipo" required>
+                                <option value="">Selecciona una opción...</option>
+                                <option value="soporte_tecnico">Soporte Técnico</option>
+                                <option value="pagos">Pagos y Facturación</option>
+                                <option value="docente">Información para Docentes</option>
+                                <option value="estudiante">Información para Estudiantes</option>
+                                <option value="sugerencia">Sugerencias</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mensaje" class="form-label">Mensaje *</label>
+                            <textarea class="form-control" id="mensaje" name="mensaje" rows="6" required></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="aceptar_privacidad" required>
+                            <label class="form-check-label" for="aceptar_privacidad">
+                                He leído y acepto la <a href="{{ url_for('main.privacidad') }}">Política de Privacidad</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-paper-plane me-2"></i> Enviar Mensaje
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h4 class="mb-3">Síguenos en Redes Sociales</h4>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="#" class="btn btn-outline-primary btn-lg rounded-circle" style="width: 50px; height: 50px;" title="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-info btn-lg rounded-circle" style="width: 50px; height: 50px;" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-danger btn-lg rounded-circle" style="width: 50px; height: 50px;" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-lg rounded-circle" style="width: 50px; height: 50px;" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Aquí normalmente enviarías el formulario al backend
+    // Por ahora mostramos un mensaje de confirmación
+    
+    alert('¡Gracias por tu mensaje! Te responderemos pronto.');
+    this.reset();
+});
+</script>
+{% endblock %}

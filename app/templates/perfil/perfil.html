@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4"><i class="fas fa-user-circle me-2"></i>Mi Perfil</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if current_user.avatar_url %}
+                    <img src="{{ current_user.avatar_url }}" class="rounded-circle mb-3" 
+                         width="150" height="150" alt="{{ current_user.nombre }}">
+                    {% else %}
+                    <i class="fas fa-user-circle fa-10x text-muted mb-3"></i>
+                    {% endif %}
+                    
+                    <h4>{{ current_user.nombre }}</h4>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    
+                    <span class="badge bg-primary mb-3">{{ current_user.rol.capitalize() }}</span>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.editar_perfil') }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Editar Perfil
+                        </a>
+                        {% if current_user.rol == 'docente' %}
+                        <a href="{{ url_for('main.completar_perfil_docente') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Perfil de Docente
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i>Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Nombre:</div>
+                        <div class="col-md-8">{{ current_user.nombre }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Email:</div>
+                        <div class="col-md-8">{{ current_user.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Teléfono:</div>
+                        <div class="col-md-8">{{ current_user.telefono or 'No especificado' }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Rol:</div>
+                        <div class="col-md-8">
+                            <span class="badge bg-primary">{{ current_user.rol.capitalize() }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 fw-bold">Miembro desde:</div>
+                        <div class="col-md-8">{{ current_user.fecha_registro.strftime('%d/%m/%Y') if current_user.fecha_registro }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-shield-alt me-2"></i>Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Autenticación de Dos Factores (2FA)</h6>
+                        {% if current_user.is_2fa_enabled %}
+                        <p class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>Activada
+                        </p>
+                        <a href="{{ url_for('auth.desactivar_2fa') }}" class="btn btn-danger btn-sm">
+                            Desactivar 2FA
+                        </a>
+                        {% else %}
+                        <p class="text-muted">No activada</p>
+                        <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-primary btn-sm">
+                            Activar 2FA
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div>
+                        <h6>Cambiar Contraseña</h6>
+                        <form method="POST" action="{{  url_for('auth.cambiar_password') }}">
+                            <div class="mb-2">
+                                <input type="password" name="password_actual" 
+                                       class="form-control form-control-sm" placeholder="Contraseña actual">
+                            </div>
+                            <div class="mb-2">
+                                <input type="password" name="password_nueva" 
+                                       class="form-control form-control-sm" placeholder="Nueva contraseña">
+                            </div>
+                            <div class="mb-2">
+                                <input type="password" name="password_confirmar" 
+                                       class="form-control form-control-sm" placeholder="Confirmar nueva contraseña">
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-sm">
+                                Cambiar Contraseña
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

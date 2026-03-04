@@ -1,0 +1,15 @@
+Hola {{ usuario.nombre }},
+
+Tu clase ha sido confirmada:
+
+Docente: {{ clase.docente_rel.usuario.nombre }}
+Fecha: {{ clase.fecha_inicio.strftime('%d/%m/%Y') }}
+Hora: {{ clase.fecha_inicio.strftime('%H:%M') }}
+Duración: {{ clase.duracion_minutos }} minutos
+
+Enlace de videollamada: {{ clase.link_jitsi }}
+
+Te recomendamos unirte 5 minutos antes de la hora programada.
+
+Saludos,
+{{ app_name }}

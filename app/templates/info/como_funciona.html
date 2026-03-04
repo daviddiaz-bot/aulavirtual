@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Cómo Funciona - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="display-4 fw-bold text-center mb-4">¿Cómo Funciona Aula Virtual?</h1>
+            <p class="lead text-center text-muted mb-5">Aprende en 4 simples pasos</p>
+
+            <!-- Pasos -->
+            <div class="row mb-5">
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <div class="step-circle mx-auto mb-3">1</div>
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h4>Regístrate</h4>
+                        <p class="text-muted">Crea tu cuenta gratis en menos de 2 minutos. Solo necesitas tu email.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <div class="step-circle mx-auto mb-3">2</div>
+                        <i class="fas fa-search fa-3x text-success mb-3"></i>
+                        <h4>Busca</h4>
+                        <p class="text-muted">Encuentra el docente perfecto usando nuestros filtros por especialidad, precio y calificación.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <div class="step-circle mx-auto mb-3">3</div>
+                        <i class="fas fa-calendar-check fa-3x text-info mb-3"></i>
+                        <h4>Reserva</h4>
+                        <p class="text-muted">Elige el horario que mejor te convenga y realiza el pago seguro con tu método preferido.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="text-center">
+                        <div class="step-circle mx-auto mb-3">4</div>
+                        <i class="fas fa-graduation-cap fa-3x text-warning mb-3"></i>
+                        <h4>Aprende</h4>
+                        <p class="text-muted">Conecta por videollamada a la hora programada y disfruta de tu clase personalizada.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Para Estudiantes -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-user-graduate me-2"></i> Para Estudiantes</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Ventajas</h5>
+                            <ul>
+                                <li>Acceso a cientos de docentes expertos</li>
+                                <li>Horarios 100% flexibles</li>
+                                <li>Clases personalizadas 1-a-1</li>
+                                <li>Paga solo por lo que usas</li>
+                                <li>Sistema de reseñas transparente</li>
+                                <li>Cancela hasta 24h antes sin costo</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Proceso de Reserva</h5>
+                            <ol>
+                                <li>Explora perfiles de docentes</li>
+                                <li>Lee reseñas de otros estudiantes</li>
+                                <li>Selecciona fecha y hora disponibles</li>
+                                <li>Realiza el pago seguro</li>
+                                <li>Recibe confirmación por email</li>
+                                <li>Únete a la videollamada a la hora indicada</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Para Docentes -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i> Para Docentes</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Beneficios</h5>
+                            <ul>
+                                <li>Trabaja desde cualquier lugar</li>
+                                <li>Define tus propios horarios</li>
+                                <li>Establece tus propias tarifas</li>
+                                <li>Recibe el 85% de tus ganancias</li>
+                                <li>Retiros semanales sin complicaciones</li>
+                                <li>Acceso a miles de estudiantes potenciales</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Cómo Empezar</h5>
+                            <ol>
+                                <li>Regístrate como docente</li>
+                                <li>Completa tu perfil profesional</li>
+                                <li>Verifica tu identidad</li>
+                                <li>Configura tu disponibilidad</li>
+                                <li>Establece tu tarifa por hora</li>
+                                <li>¡Comienza a recibir estudiantes!</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preguntas Frecuentes -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-question-circle me-2"></i> Preguntas Frecuentes</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    ¿Cómo funcionan las videollamadas?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Usamos Jitsi Meet, una plataforma segura y sin necesidad de instalación. Solo necesitas un navegador moderno y una conexión a internet estable.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    ¿Qué métodos de pago aceptan?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Aceptamos tarjetas de crédito/débito (Visa, Mastercard, American Express), PayPal y criptomonedas (Bitcoin, Ethereum).
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    ¿Puedo cancelar una clase?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sí, puedes cancelar hasta 24 horas antes de la clase con reembolso del 100%. Entre 12-24h antes recibes 50% de reembolso. Menos de 12h no hay reembolso.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h3 class="mb-4">¿Listo para Comenzar?</h3>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5">Registrarse Gratis</a>
+                {% else %}
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-5">Ir al Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.step-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

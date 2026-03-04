@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Pagar Clase - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-credit-card me-2"></i>Pagar Clase</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-4">Resumen de la Reserva</h5>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table">
+                            <tr>
+                                <th>Docente:</th>
+                                <td>{{ clase.docente_rel.usuario.nombre }}</td>
+                            </tr>
+                            <tr>
+                                <th>Especialidad:</th>
+                                <td>{{ clase.docente_rel.especialidad }}</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha y Hora:</th>
+                                <td>{{ clase.fecha_inicio.strftime('%d/%m/%Y a las %H:%M') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Duración:</th>
+                                <td>{{ clase.duracion_minutos }} minutos</td>
+                            </tr>
+                            <tr>
+                                <th>Título:</th>
+                                <td>{{ clase.titulo }}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th>Total a Pagar:</th>
+                                <th class="text-primary">${{ "%.2f"|format(clase.monto) }}</th>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <h5 class="mb-3">Método de Pago</h5>
+                    
+                    <div id="payment-element">
+                        <!-- Stripe Payment Element se insertará aquí -->
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>
+                            Los pagos son procesados de forma segura por Stripe. 
+                            Tu información de pago está protegida con encriptación de nivel bancario.
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button id="submit-button" class="btn btn-primary btn-lg">
+                            <i class="fas fa-lock me-2"></i>Pagar ${{ "%.2f"|format(clase.monto) }}
+                        </button>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                    
+                    <div id="error-message" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+// Configurar Stripe
+const stripe = Stripe('{{ stripe_key }}');
+const elements = stripe.elements({
+    clientSecret: '{{ client_secret }}'
+});
+
+const paymentElement = elements.create('payment');
+paymentElement.mount('#payment-element');
+
+document.getElementById('submit-button').addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    const submitButton = e.target;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    
+    const {error} = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: '{{ url_for("main.pago_exitoso", clase_id=clase.id, _external=True) }}'
+        }
+    });
+    
+    if (error) {
+        const errorMsg = document.getElementById('error-message');
+        errorMsg.textContent = error.message;
+        errorMsg.classList.remove('d-none');
+        
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-lock me-2"></i>Pagar ${{ "%.2f"|format(clase.monto) }}';
+    }
+});
+</script>
+{% endblock %}

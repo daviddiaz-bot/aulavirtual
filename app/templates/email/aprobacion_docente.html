@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; }
+        .content { background: #f9f9f9; padding: 30px; }
+        .success-icon { font-size: 60px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✓</div>
+            <h1>¡Perfil Aprobado!</h1>
+        </div>
+        <div class="content">
+            <h2>¡Felicidades {{ usuario.nombre }}!</h2>
+            <p>Tu perfil de docente ha sido verificado y aprobado por nuestro equipo.</p>
+            
+            <p><strong>Ya puedes comenzar a:</strong></p>
+            <ul>
+                <li>Recibir reservas de estudiantes</li>
+                <li>Aparecer en las búsquedas de la plataforma</li>
+                <li>Impartir clases y generar ingresos</li>
+            </ul>
+            
+            <p><strong>Consejos para tener éxito:</strong></p>
+            <ul>
+                <li>Mantén tu perfil actualizado</li>
+                <li>Responde rápidamente a las consultas</li>
+                <li>Ofrece clases de calidad</li>
+                <li>Mantén buena comunicación con los estudiantes</li>
+            </ul>
+            
+            <p>¡Bienvenido al equipo de docentes de {{ app_name }}!</p>
+        </div>
+    </div>
+</body>
+</html>

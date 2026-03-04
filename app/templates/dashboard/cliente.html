@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Estudiante - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Dashboard - Estudiante</h1>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-graduation-cap me-2"></i>Clases Completadas</h5>
+                    <p class="display-4">{{ clases_completadas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-calendar-check me-2"></i>Clases Próximas</h5>
+                    <p class="display-4">{{ clases_proximas|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-chalkboard-teacher me-2"></i>Docentes</h5>
+                    <p class="display-4">{{ docentes|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Próximas Clases -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Próximas Clases</h5>
+                    <a href="{{ url_for('main.mis_clases') }}" class="btn btn-sm btn-primary">Ver Todas</a>
+                </div>
+                <div class="card-body">
+                    {% if clases_proximas %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Docente</th>
+                                    <th>Materia</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for clase in clases_proximas %}
+                                <tr>
+                                    <td>{{ clase.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ clase.docente_rel.usuario.nombre }}</td>
+                                    <td>{{ clase.titulo }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if clase.estado == 'confirmada' else 'warning' }}">
+                                            {{ clase.estado }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('main.detalle_clase', clase_id=clase.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">Ver Detalles</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No tienes clases programadas</p>
+                    <a href="{{ url_for('main.docentes') }}" class="btn btn-primary">Buscar Docentes</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Buscar Docentes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Buscar Docentes</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('main.buscar_docentes') }}" class="row g-3">
+                        <div class="col-md-8">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o especialidad...">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

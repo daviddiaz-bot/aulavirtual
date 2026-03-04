@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #6c757d; color: white; padding: 30px; text-align: center; }
+        .content { background: #f9f9f9; padding: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reporte Diario</h1>
+            <p>{{ fecha.strftime('%d de %B de %Y') }}</p>
+        </div>
+        <div class="content">
+            <h3>Actividad del Día</h3>
+            
+            <table>
+                <tr>
+                    <th>Métrica</th>
+                    <th>Valor</th>
+                </tr>
+                <tr>
+                    <td>Clases realizadas</td>
+                    <td><strong>{{ clases }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Nuevos usuarios</td>
+                    <td><strong>{{ usuarios }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Ingresos generados</td>
+                    <td><strong>${{ "%.2f"|format(ingresos) }}</strong></td>
+                </tr>
+            </table>
+            
+            <p><small>Este es un reporte automático generado por el sistema.</small></p>
+        </div>
+    </div>
+</body>
+</html>

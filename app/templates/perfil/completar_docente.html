@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Completar Perfil de Docente - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-chalkboard-teacher me-2"></i>Perfil de Docente</h4>
+                </div>
+                <div class="card-body">
+                    {% if not docente.verificado %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Tu perfil está pendiente de verificación. Completa toda la información para acelerar el proceso.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="especialidad" class="form-label">Especialidad</label>
+                            <input type="text" class="form-control" id="especialidad" name="especialidad" 
+                                   value="{{ docente.especialidad or '' }}" 
+                                   placeholder="Ej: Matemáticas, Programación, Inglés" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción / Sobre ti</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required
+                                      placeholder="Cuéntales a los estudiantes sobre tu experiencia y metodología">{{ docente.descripcion or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="experiencia" class="form-label">Experiencia Profesional</label>
+                            <textarea class="form-control" id="experiencia" name="experiencia" rows="4"
+                                      placeholder="Describe tu experiencia laboral y docente">{{ docente.experiencia or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="educacion" class="form-label">Educación</label>
+                            <textarea class="form-control" id="educacion" name="educacion" rows="3"
+                                      placeholder="Títulos, certificaciones y estudios relevantes">{{ docente.educacion or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="precio_hora" class="form-label">Precio por Hora (USD)</label>
+                            <input type="number" class="form-control" id="precio_hora" name="precio_hora" 
+                                   value="{{ docente.precio_hora }}" step="0.01" min="5" required>
+                            <small class="form-text text-muted">Recibirás el 85% después de cada clase completada</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Perfil
+                            </button>
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                                Volver al Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

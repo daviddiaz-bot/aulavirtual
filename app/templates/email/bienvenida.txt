@@ -1,0 +1,29 @@
+Bienvenido/a {{ usuario.nombre }}!
+
+Gracias por unirte a {{ app_name }}.
+
+{% if usuario.rol == 'docente' %}
+Como docente, ahora puedes:
+- Completar tu perfil profesional
+- Establecer tu disponibilidad y precio por hora
+- Comenzar a ofrecer clases a estudiantes de todo el mundo
+
+Los siguientes pasos:
+1. Completa tu perfil de docente
+2. Espera la verificación de nuestro equipo
+3. ¡Comienza a impartir clases!
+
+{% elif usuario.rol == 'cliente' %}
+Como estudiante, ahora puedes:
+- Buscar docentes especializados
+- Reservar clases según tu horario
+- Aprender con los mejores profesionales
+
+¡Comienza tu viaje de aprendizaje hoy!
+
+{% endif %}
+
+Si tienes alguna pregunta, no dudes en contactarnos.
+
+Saludos,
+El equipo de {{ app_name }}

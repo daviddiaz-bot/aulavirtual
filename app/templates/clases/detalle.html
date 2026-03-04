@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Clase - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-book-open me-2"></i>{{ clase.titulo }}</h4>
+                    <span class="badge bg-{{ 'success' if clase.estado == 'confirmada' else 'warning' if clase.estado == 'pendiente' else 'primary' if clase.estado == 'completada' else 'danger' }} fs-6">
+                        {{ clase.estado }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h5>Información de la Clase</h5>
+                    <hr>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-calendar me-2"></i>Fecha:</strong><br>
+                            {{ clase.fecha_inicio.strftime('%d de %B de %Y') }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
+                            {{ clase.fecha_inicio.strftime('%H:%M') }} - {{ clase.fecha_fin.strftime('%H:%M') if clase.fecha_fin }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-hourglass-half me-2"></i>Duración:</strong><br>
+                            {{ clase.duracion_minutos }} minutos
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-dollar-sign me-2"></i>Monto:</strong><br>
+                            ${{ "%.2f"|format(clase.monto) }}
+                        </div>
+                    </div>
+                    
+                    {% if clase.descripcion %}
+                    <div class="mb-3">
+                        <strong><i class="fas fa-file-alt me-2"></i>Descripción:</strong><br>
+                        <p class="mt-2">{{ clase.descripcion }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if clase.estado_pago %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Pago Confirmado</strong> - La clase está confirmada
+                    </div>
+                    
+                    {% if clase.link_jitsi and clase.estado == 'confirmada' %}
+                    <div class="d-grid mb-3">
+                        <a href="{{ clase.link_jitsi }}" target="_blank" class="btn btn-success btn-lg">
+                            <i class="fas fa-video me-2"></i>Unirse a la Videollamada
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Pago Pendiente</strong> - Debe completarse el pago para confirmar la clase
+                    </div>
+                    
+                    {% if current_user.id == clase.cliente_id %}
+                    <div class="d-grid mb-3">
+                        <a href="{{ url_for('main.pagar_clase', clase_id=clase.id) }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>Pagar Ahora
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    
+                    {% if current_user.rol == 'cliente' and clase.notas_docente %}
+                    <div class="mb-3">
+                        <strong><i class="fas fa-sticky-note me-2"></i>Notas del Docente:</strong><br>
+                        <p class="mt-2">{{ clase.notas_docente }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if current_user.rol == 'docente' and clase.notas_cliente %}
+                    <div class="mb-3">
+                        <strong><i class="fas fa-sticky-note me-2"></i>Notas del Estudiante:</strong><br>
+                        <p class="mt-2">{{ clase.notas_cliente }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Materiales -->
+            {% if materiales %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-folder me-2"></i>Materiales de la Clase</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for material in materiales %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-file-{{ material.tipo }} me-2"></i>{{ material.titulo }}
+                                </h6>
+                                <small>{{ (material.tamanio_kb / 1024)|round(2) }} MB</small>
+                            </div>
+                            {% if material.descripcion %}
+                            <p class="mb-1 small text-muted">{{ material.descripcion }}</p>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>
+                        {% if current_user.rol == 'cliente' %}
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Docente
+                        {% else %}
+                        <i class="fas fa-user-graduate me-2"></i>Estudiante
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if current_user.rol == 'cliente' %}
+                        {% set persona = clase.docente_rel.usuario %}
+                    {% else %}
+                        {% set persona = clase.cliente %}
+                    {% endif %}
+                    
+                    {% if persona.avatar_url %}
+                    <img src="{{ persona.avatar_url }}" class="rounded-circle mb-3" width="100" height="100">
+                    {% else %}
+                    <i class="fas fa-user-circle fa-5x text-muted mb-3"></i>
+                    {% endif %}
+                    
+                    <h5>{{ persona.nombre }}</h5>
+                    
+                    {% if current_user.rol == 'cliente' %}
+                    <p class="text-muted">{{ clase.docente_rel.especialidad }}</p>
+                    
+                    <div class="mb-2">
+                        <i class="fas fa-star text-warning"></i>
+                        {{ "%.1f"|format(clase.docente_rel.promedio_calificacion) }}
+                        ({{ clase.docente_rel.total_resenas }})
+                    </div>
+                    
+                    <a href="{{ url_for('main.perfil_docente', docente_id=clase.docente_rel.id) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        Ver Perfil Completo
+                    </a>
+                    {% else %}
+                    <p class="text-muted">{{ persona.email }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if clase.estado == 'confirmada' %}
+            <div class="card">
+                <div class="card-body">
+                    <h6><i class="fas fa-info-circle me-2"></i>Información Importante</h6>
+                    <ul class="small">
+                        <li>Únete 5 minutos antes de la hora programada</li>
+                        <li>Asegúrate de tener buena conexión a internet</li>
+                        <li>Ten tu cámara y micrófono listos</li>
+                        {% if current_user.rol == 'cliente' %}
+                        <li>Prepara tus preguntas con anticipación</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

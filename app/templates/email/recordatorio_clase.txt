@@ -1,0 +1,19 @@
+Recordatorio: Clase Mañana
+
+Hola {{ usuario.nombre }},
+
+Te recordamos que tienes una clase programada para mañana:
+
+Fecha: {{ clase.fecha_inicio.strftime('%d/%m/%Y') }}
+Hora: {{ clase.fecha_inicio.strftime('%H:%M') }}
+
+{% if clase.docente_rel %}
+Docente: {{ clase.docente_rel.usuario.nombre }}
+{% else %}
+Estudiante: {{ clase.cliente.nombre }}
+{% endif %}
+
+Enlace: {{ clase.link_jitsi }}
+
+¡Nos vemos mañana!
+{{ app_name }}

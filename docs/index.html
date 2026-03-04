@@ -1,0 +1,3790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Virtual - Documentación Completa</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Highlight.js para código -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f8f9fa;
+            padding-top: 70px;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - 70px);
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar .nav-section {
+            padding: 1.5rem 1rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .nav-link {
+            color: #4b5563;
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .sidebar .nav-link:hover {
+            background: #f3f4f6;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .sidebar .nav-link.active {
+            background: #eff6ff;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem 3rem;
+            transition: margin-left 0.3s;
+            min-height: calc(100vh - 70px);
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        /* Cards */
+        .doc-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typography */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .subsection-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #282c34;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .inline-code {
+            background: #f1f5f9;
+            color: #e11d48;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        /* Alerts */
+        .alert-custom {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .alert-custom i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Tables */
+        .table-custom {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .table-custom thead {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .table-custom tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Steps */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-custom {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Toggle button */
+        .toggle-sidebar {
+            position: fixed;
+            top: 85px;
+            left: calc(var(--sidebar-width) - 20px);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .toggle-sidebar:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .toggle-sidebar.collapsed {
+            left: 20px;
+        }
+
+        /* Search */
+        .search-box {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Badge */
+        .badge-custom {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        /* Scrollbar personalizado */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .toggle-sidebar {
+                left: 20px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .navbar-custom, .sidebar, .toggle-sidebar {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+
+            .doc-card {
+                page-break-inside: avoid;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Aula Virtual Docs
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../" target="_blank">
+                            <i class="fas fa-home me-1"></i> Ir a la App
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com" target="_blank">
+                            <i class="fab fa-github me-1"></i> GitHub
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-light ms-2" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i> Imprimir
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toggle Sidebar Button -->
+    <button class="toggle-sidebar" id="toggleSidebar" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="search-box">
+            <input type="text" class="form-control" id="searchDocs" placeholder="🔍 Buscar en docs...">
+        </div>
+
+        <div class="nav-section">Guías Principales</div>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="#" data-section="inicio">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <a class="nav-link" href="#" data-section="implementacion">
+                <i class="fas fa-rocket"></i> Implementación
+            </a>
+            <a class="nav-link" href="#" data-section="administracion">
+                <i class="fas fa-cog"></i> Administración
+            </a>
+        </nav>
+
+        <div class="nav-section">Manuales de Usuario</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="#" data-section="usuario">
+                <i class="fas fa-user-graduate"></i> Manual Estudiante
+            </a>
+            <a class="nav-link" href="#" data-section="docente">
+                <i class="fas fa-chalkboard-teacher"></i> Manual Docente
+            </a>
+        </nav>
+
+        <div class="nav-section">Testing & QA</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="#" data-section="qa">
+                <i class="fas fa-check-double"></i> QA y Testing
+            </a>
+            <a class="nav-link" href="#" data-section="seguridad">
+                <i class="fas fa-shield-alt"></i> Seguridad
+            </a>
+        </nav>
+
+        <div class="nav-section">Referencias</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="#" data-section="api">
+                <i class="fas fa-code"></i> API Reference
+            </a>
+            <a class="nav-link" href="#" data-section="faq">
+                <i class="fas fa-question-circle"></i> FAQ
+            </a>
+        </nav>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Inicio Section -->
+        <div id="inicio-section" class="doc-section">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">Inicio</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-graduation-cap text-primary me-3"></i>
+                Documentación de Aula Virtual
+            </h1>
+            <p class="page-subtitle">
+                Sistema completo de gestión educativa - Guía integral de implementación, administración y uso
+            </p>
+
+            <div class="doc-card">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-4 bg-light rounded">
+                            <i class="fas fa-rocket fa-3x text-primary mb-3"></i>
+                            <h5>Implementación</h5>
+                            <p class="text-muted mb-3">Guía paso a paso para desplegar Aula Virtual</p>
+                            <button class="btn btn-primary btn-sm" onclick="showSection('implementacion')">
+                                Ver Guía <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-4 bg-light rounded">
+                            <i class="fas fa-cog fa-3x text-success mb-3"></i>
+                            <h5>Administración</h5>
+                            <p class="text-muted mb-3">Gestión diaria del sistema y usuarios</p>
+                            <button class="btn btn-success btn-sm" onclick="showSection('administracion')">
+                                Ver Manual <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-4 bg-light rounded">
+                            <i class="fas fa-check-double fa-3x text-warning mb-3"></i>
+                            <h5>QA & Testing</h5>
+                            <p class="text-muted mb-3">Pruebas y aseguramiento de calidad</p>
+                            <button class="btn btn-warning btn-sm" onclick="showSection('qa')">
+                                Ver Tests <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h3 class="mb-4"><i class="fas fa-info-circle text-primary me-2"></i> Acerca de Aula Virtual</h3>
+                <p><strong>Aula Virtual</strong> es una plataforma completa de gestión educativa que conecta estudiantes con docentes profesionales para clases personalizadas en tiempo real.</p>
+                
+                <h5 class="mt-4 mb-3">Características Principales:</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Autenticación con 2FA</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Sistema de pagos Stripe</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Videollamadas Jitsi Meet</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Gestión de clases</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Calendario integrado</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Sistema de reseñas</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Panel de administración</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> API REST completa</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Notificaciones email</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Docker ready</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h3 class="mb-4"><i class="fas fa-layer-group text-primary me-2"></i> Stack Tecnológico</h3>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Tecnología</th>
+                                <th>Versión</th>
+                                <th>Propósito</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><i class="fab fa-python text-primary"></i> Backend</td>
+                                <td>Flask</td>
+                                <td>2.3+</td>
+                                <td>Framework web Python</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-database text-success"></i> Base de Datos</td>
+                                <td>PostgreSQL</td>
+                                <td>15+</td>
+                                <td>Almacenamiento principal</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-bolt text-danger"></i> Cache</td>
+                                <td>Redis</td>
+                                <td>7+</td>
+                                <td>Sesiones y colas</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-server text-info"></i> Web Server</td>
+                                <td>Nginx</td>
+                                <td>1.25+</td>
+                                <td>Reverse proxy</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fab fa-docker text-primary"></i> Containers</td>
+                                <td>Docker</td>
+                                <td>Latest</td>
+                                <td>Containerización</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="alert alert-custom alert-info">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Consejo:</strong> Usa el menú lateral para navegar entre las distintas secciones de la documentación. Puedes buscar contenido específico usando el buscador en la parte superior del menú.
+            </div>
+        </div>
+
+        <!-- Implementación Section -->
+        <div id="implementacion-section" class="doc-section" style="display: none;">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showSection('inicio')">Inicio</a></li>
+                    <li class="breadcrumb-item active">Implementación</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-rocket text-primary me-3"></i>
+                Guía de Implementación
+            </h1>
+            <p class="page-subtitle">
+                Instrucciones completas para desplegar Aula Virtual desde cero
+            </p>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Requisitos Previos</h2>
+                
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Antes de comenzar:</strong> Asegúrate de tener acceso a todos los servicios necesarios antes de iniciar el despliegue.
+                </div>
+
+                <h3 class="subsection-title">1.1 Software Requerido</h3>
+                <ul>
+                    <li><strong>Docker Desktop:</strong> v20.10 o superior</li>
+                    <li><strong>Docker Compose:</strong> v2.0 o superior</li>
+                    <li><strong>Git:</strong> Para clonar el repositorio</li>
+                    <li><strong>Editor de texto:</strong> VS Code, Sublime, etc.</li>
+                </ul>
+
+                <h3 class="subsection-title">1.2 Cuentas de Servicios</h3>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Servicio</th>
+                                <th>Propósito</th>
+                                <th>Costo</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Stripe</strong></td>
+                                <td>Procesamiento de pagos</td>
+                                <td>Gratis (modo test)</td>
+                                <td><a href="https://stripe.com" target="_blank">stripe.com</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gmail/SMTP</strong></td>
+                                <td>Envío de emails</td>
+                                <td>Gratis</td>
+                                <td><a href="https://gmail.com" target="_blank">gmail.com</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>AWS/DigitalOcean</strong></td>
+                                <td>Hosting (producción)</td>
+                                <td>Variable</td>
+                                <td><a href="https://aws.amazon.com" target="_blank">aws.amazon.com</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Instalación Local (Desarrollo)</h2>
+
+                <div class="d-flex align-items-center mb-3">
+                    <span class="step-badge">1</span>
+                    <h3 class="subsection-title mb-0">Clonar el Repositorio</h3>
+                </div>
+
+                <pre><code class="language-bash">git clone https://github.com/tu-usuario/aulavirtual.git
+cd aulavirtual</code></pre>
+
+                <div class="d-flex align-items-center mb-3 mt-4">
+                    <span class="step-badge">2</span>
+                    <h3 class="subsection-title mb-0">Configurar Variables de Entorno</h3>
+                </div>
+
+                <p>Copia el archivo de ejemplo y edítalo con tus credenciales:</p>
+
+                <pre><code class="language-bash">cp .env.example .env
+nano .env  # o usa tu editor preferido</code></pre>
+
+                <p><strong>Variables críticas a configurar:</strong></p>
+
+                <pre><code class="language-bash"># Flask
+SECRET_KEY=genera-con-openssl-rand-hex-32
+DATABASE_URL=postgresql://aulavirtual:password@db:5432/aulavirtual
+
+# Stripe
+STRIPE_PUBLIC_KEY=pk_test_xxxxx
+STRIPE_SECRET_KEY=sk_test_xxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+
+# Email
+MAIL_USERNAME=tu-email@gmail.com
+MAIL_PASSWORD=contraseña-de-aplicacion
+
+# Redis
+REDIS_URL=redis://redis:6379/0</code></pre>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-key"></i>
+                    <strong>Generar SECRET_KEY:</strong> Usa <code class="inline-code">openssl rand -hex 32</code> para generar una clave segura.
+                </div>
+
+                <div class="d-flex align-items-center mb-3 mt-4">
+                    <span class="step-badge">3</span>
+                    <h3 class="subsection-title mb-0">Iniciar con Docker</h3>
+                </div>
+
+                <pre><code class="language-bash"># Construir e iniciar todos los contenedores
+docker-compose up --build -d
+
+# Ver logs en tiempo real
+docker-compose logs -f web</code></pre>
+
+                <div class="d-flex align-items-center mb-3 mt-4">
+                    <span class="step-badge">4</span>
+                    <h3 class="subsection-title mb-0">Inicializar Base de Datos</h3>
+                </div>
+
+                <pre><code class="language-bash"># Crear tablas
+docker-compose exec web flask db upgrade
+
+# Crear usuario administrador
+docker-compose exec web python crear_admin.py
+
+# Verificar instalación
+docker-compose exec web python verificar_sistema.py</code></pre>
+
+                <div class="d-flex align-items-center mb-3 mt-4">
+                    <span class="step-badge">5</span>
+                    <h3 class="subsection-title mb-0">Acceder a la Aplicación</h3>
+                </div>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>¡Listo!</strong> Abre tu navegador en <a href="http://localhost" target="_blank" class="alert-link">http://localhost</a>
+                </div>
+
+                <p><strong>Credenciales por defecto:</strong></p>
+                <ul>
+                    <li><strong>Email:</strong> admin@aulavirtual.com</li>
+                    <li><strong>Password:</strong> Admin123!</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Configuración de Stripe</h2>
+
+                <h3 class="subsection-title">3.1 Obtener Claves de API</h3>
+                <ol>
+                    <li>Ve a <a href="https://dashboard.stripe.com/register" target="_blank">Stripe Dashboard</a></li>
+                    <li>Crea una cuenta o inicia sesión</li>
+                    <li>Ve a <strong>Developers → API keys</strong></li>
+                    <li>Copia las claves de <strong>Test mode</strong>:
+                        <ul>
+                            <li>Publishable key (empieza con <code class="inline-code">pk_test_</code>)</li>
+                            <li>Secret key (empieza con <code class="inline-code">sk_test_</code>)</li>
+                        </ul>
+                    </li>
+                    <li>Pégalas en tu archivo <code class="inline-code">.env</code></li>
+                </ol>
+
+                <h3 class="subsection-title">3.2 Configurar Webhooks</h3>
+                <ol>
+                    <li>Ve a <strong>Developers → Webhooks</strong></li>
+                    <li>Click en <strong>Add endpoint</strong></li>
+                    <li>URL del endpoint: <code class="inline-code">https://tudominio.com/webhook/stripe</code></li>
+                    <li>Selecciona eventos:
+                        <ul>
+                            <li><code class="inline-code">payment_intent.succeeded</code></li>
+                            <li><code class="inline-code">payment_intent.payment_failed</code></li>
+                            <li><code class="inline-code">charge.refunded</code></li>
+                        </ul>
+                    </li>
+                    <li>Copia el <strong>Webhook signing secret</strong> a tu <code class="inline-code">.env</code></li>
+                </ol>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> En modo test, usa las tarjetas de prueba de Stripe. Tarjeta exitosa: <code class="inline-code">4242 4242 4242 4242</code>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Comandos Útiles</h2>
+
+                <h3 class="subsection-title">Docker</h3>
+                <pre><code class="language-bash"># Ver contenedores corriendo
+docker-compose ps
+
+# Ver logs
+docker-compose logs -f web
+
+# Reiniciar aplicación
+docker-compose restart web
+
+# Detener todo
+docker-compose down
+
+# Detener y eliminar datos
+docker-compose down -v
+
+# Acceder al shell de Flask
+docker-compose exec web flask shell
+
+# Acceder a PostgreSQL
+docker-compose exec db psql -U aulavirtual -d aulavirtual</code></pre>
+
+                <h3 class="subsection-title">Base de Datos</h3>
+                <pre><code class="language-bash"># Crear migración
+docker-compose exec web flask db migrate -m "descripcion"
+
+# Aplicar migraciones
+docker-compose exec web flask db upgrade
+
+# Revertir migración
+docker-compose exec web flask db downgrade
+
+# Ver historial
+docker-compose exec web flask db history</code></pre>
+            </div>
+        </div>
+
+        <!-- Administración Section -->
+        <div id="administracion-section" class="doc-section" style="display: none;">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showSection('inicio')">Inicio</a></li>
+                    <li class="breadcrumb-item active">Administración</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-cog text-success me-3"></i>
+                Manual de Administración
+            </h1>
+            <p class="page-subtitle">
+                Gestión diaria del sistema, usuarios y configuraciones
+            </p>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Panel de Administración</h2>
+                
+                <p>El panel de administración está disponible en <code class="inline-code">/admin</code> y solo es accesible para usuarios con rol <span class="badge bg-danger">admin</span>.</p>
+
+                <h3 class="subsection-title">1.1 Acceder al Panel</h3>
+                <ol>
+                    <li>Inicia sesión con una cuenta de administrador</li>
+                    <li>En el menú superior, click en <strong>"Admin"</strong></li>
+                    <li>Serás redirigido al dashboard administrativo</li>
+                </ol>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-user-shield"></i>
+                    <strong>Roles del Sistema:</strong><br>
+                    <span class="badge bg-danger me-2">admin</span> Acceso total al sistema<br>
+                    <span class="badge bg-success me-2">docente</span> Puede impartir clases<br>
+                    <span class="badge bg-primary me-2">estudiante</span> Puede tomar clases
+                </div>
+
+                <h3 class="subsection-title">1.2 Estadísticas Generales</h3>
+                <p>El dashboard muestra métricas clave del sistema:</p>
+                <ul>
+                    <li><strong>Total de Usuarios:</strong> Desglosado por rol</li>
+                    <li><strong>Clases Completadas:</strong> Total del mes y acumulado</li>
+                    <li><strong>Ingresos:</strong> Totales y comisiones generadas</li>
+                    <li><strong>Docentes Activos:</strong> Docentes verificados y con clases</li>
+                    <li><strong>Tasa de Ocupación:</strong> Porcentaje de horarios ocupados</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Gestión de Usuarios</h2>
+
+                <h3 class="subsection-title">2.1 Ver Lista de Usuarios</h3>
+                <p>En <strong>Admin → Usuarios</strong> puedes:</p>
+                <ul>
+                    <li>Ver todos los usuarios registrados</li>
+                    <li>Filtrar por rol, estado, fecha de registro</li>
+                    <li>Buscar por nombre o email</li>
+                    <li>Ver detalles completos de cada usuario</li>
+                </ul>
+
+                <h3 class="subsection-title">2.2 Editar Usuario</h3>
+                <ol>
+                    <li>Click en el botón <strong>"Editar"</strong> junto al usuario</li>
+                    <li>Modifica los campos necesarios:
+                        <ul>
+                            <li>Nombre completo</li>
+                            <li>Email (único)</li>
+                            <li>Rol del sistema</li>
+                            <li>Estado (activo/suspendido)</li>
+                        </ul>
+                    </li>
+                    <li>Click en <strong>"Guardar Cambios"</strong></li>
+                </ol>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Cuidado:</strong> Cambiar el rol de un usuario puede afectar sus permisos y accesos. Asegúrate de que sea necesario.
+                </div>
+
+                <h3 class="subsection-title">2.3 Suspender Usuario</h3>
+                <p>Para suspender temporalmente una cuenta:</p>
+                <ol>
+                    <li>Ve a los detalles del usuario</li>
+                    <li>Click en <strong>"Suspender Cuenta"</strong></li>
+                    <li>Proporciona un motivo (opcional pero recomendado)</li>
+                    <li>Confirma la acción</li>
+                </ol>
+
+                <p><strong>Efectos de la suspensión:</strong></p>
+                <ul>
+                    <li>El usuario no puede iniciar sesión</li>
+                    <li>Las clases programadas se cancelan automáticamente</li>
+                    <li>Los fondos pendientes se retienen hasta resolver</li>
+                    <li>Se envía notificación por email al usuario</li>
+                </ul>
+
+                <h3 class="subsection-title">2.4 Eliminar Usuario</h3>
+                <div class="alert alert-custom alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Acción Irreversible:</strong> La eliminación es permanente y no se puede deshacer. Considera suspender en su lugar.
+                </div>
+
+                <p>Para eliminar un usuario:</p>
+                <ol>
+                    <li>Ve a Configuración del usuario</li>
+                    <li>Scroll hasta la sección <strong>"Zona de Peligro"</strong></li>
+                    <li>Click en <strong>"Eliminar Usuario"</strong></li>
+                    <li>Confirma escribiendo el email del usuario</li>
+                </ol>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Gestión de Docentes</h2>
+
+                <h3 class="subsection-title">3.1 Verificación de Docentes</h3>
+                <p>Los docentes nuevos deben ser verificados antes de poder recibir estudiantes.</p>
+
+                <p><strong>Proceso de verificación:</strong></p>
+                <ol>
+                    <li>Ve a <strong>Admin → Docentes Pendientes</strong></li>
+                    <li>Revisa el perfil del docente:
+                        <ul>
+                            <li>Información personal</li>
+                            <li>Especialidades declaradas</li>
+                            <li>Experiencia y educación</li>
+                            <li>Certificaciones (si las subió)</li>
+                        </ul>
+                    </li>
+                    <li>Verifica credenciales y documentos</li>
+                    <li>Toma una decisión:
+                        <ul>
+                            <li><strong>Aprobar:</strong> El docente puede empezar a recibir estudiantes</li>
+                            <li><strong>Rechazar:</strong> Proporciona motivo para rechazo</li>
+                            <li><strong>Solicitar más información:</strong> Envía mensaje al docente</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Criterios de Aprobación:</strong>
+                    <ul class="mb-0">
+                        <li>Perfil completo con información veraz</li>
+                        <li>Experiencia relevante en el área</li>
+                        <li>Certificaciones válidas (si aplica)</li>
+                        <li>Sin antecedentes negativos</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">3.2 Gestionar Docentes Activos</h3>
+                <p>En <strong>Admin → Docentes</strong> puedes:</p>
+                <ul>
+                    <li>Ver todos los docentes verificados</li>
+                    <li>Estadísticas por docente:
+                        <ul>
+                            <li>Número de clases impartidas</li>
+                            <li>Calificación promedio</li>
+                            <li>Ingresos generados</li>
+                            <li>Tasa de cancelación</li>
+                        </ul>
+                    </li>
+                    <li>Suspender o eliminar docentes</li>
+                    <li>Ver reseñas y quejas</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Gestión Financiera</h2>
+
+                <h3 class="subsection-title">4.1 Ver Transacciones</h3>
+                <p>En <strong>Admin → Finanzas → Transacciones</strong>:</p>
+                <ul>
+                    <li>Listado completo de todas las transacciones</li>
+                    <li>Filtros por fecha, estado, usuario</li>
+                    <li>Detalles de cada pago:
+                        <ul>
+                            <li>Monto total</li>
+                            <li>Comisión de plataforma (15%)</li>
+                            <li>Monto al docente (85%)</li>
+                            <li>Estado del pago</li>
+                            <li>ID de Stripe</li>
+                        </ul>
+                    </li>
+                    <li>Exportar a CSV para análisis</li>
+                </ul>
+
+                <h3 class="subsection-title">4.2 Procesar Retiros</h3>
+                <p>Los docentes pueden solicitar retiros de sus ganancias.</p>
+
+                <p><strong>Proceso:</strong></p>
+                <ol>
+                    <li>Ve a <strong>Admin → Finanzas → Retiros Pendientes</strong></li>
+                    <li>Revisa solicitud de retiro:
+                        <ul>
+                            <li>Monto solicitado</li>
+                            <li>Método de pago del docente</li>
+                            <li>Datos bancarios</li>
+                        </ul>
+                    </li>
+                    <li>Verifica saldo disponible del docente</li>
+                    <li>Procesa el pago externo (transferencia/PayPal)</li>
+                    <li>Marca como <strong>"Procesado"</strong> en el sistema</li>
+                    <li>Se envía confirmación al docente</li>
+                </ol>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-clock"></i>
+                    <strong>Política de Retiros:</strong>
+                    <ul class="mb-0">
+                        <li>Mínimo: $50 USD</li>
+                        <li>Procesamiento: Cada viernes</li>
+                        <li>Tiempo: 3-5 días hábiles</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">4.3 Reportes Financieros</h3>
+                <p>Genera reportes personalizados:</p>
+                <ul>
+                    <li><strong>Ingresos por período:</strong> Diario, semanal, mensual, anual</li>
+                    <li><strong>Comisiones generadas:</strong> Total de ingresos de la plataforma</li>
+                    <li><strong>Top docentes:</strong> Los que más ganancias generan</li>
+                    <li><strong>Métodos de pago:</strong> Distribución por tipo de pago</li>
+                    <li><strong>Reembolsos:</strong> Total y motivos</li>
+                </ul>
+
+                <p><strong>Exportar reportes:</strong></p>
+                <pre><code class="language-bash"># Desde el panel admin
+Admin → Reportes → Seleccionar período → Exportar CSV/PDF</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Monitoreo del Sistema</h2>
+
+                <h3 class="subsection-title">5.1 Logs de Aplicación</h3>
+                <pre><code class="language-bash"># Ver logs en tiempo real
+docker-compose logs -f web
+
+# Logs de errores solamente
+docker-compose logs -f web | grep ERROR
+
+# Últimas 100 líneas
+docker-compose logs --tail=100 web</code></pre>
+
+                <h3 class="subsection-title">5.2 Estado de Servicios</h3>
+                <pre><code class="language-bash"># Ver todos los contenedores
+docker-compose ps
+
+# Uso de recursos
+docker stats
+
+# Salud de PostgreSQL
+docker-compose exec db pg_isready
+
+# Ping a Redis
+docker-compose exec redis redis-cli ping</code></pre>
+
+                <h3 class="subsection-title">5.3 Base de Datos</h3>
+                <pre><code class="language-bash"># Conectar a PostgreSQL
+docker-compose exec db psql -U aulavirtual -d aulavirtual
+
+# Ver tamaño de la BD
+\l+
+
+# Ver tablas
+\dt
+
+# Contar usuarios
+SELECT rol, COUNT(*) FROM usuario GROUP BY rol;</code></pre>
+
+                <h3 class="subsection-title">5.4 Backups</h3>
+                <p><strong>Backup de Base de Datos:</strong></p>
+                <pre><code class="language-bash"># Crear backup
+docker-compose exec db pg_dump -U aulavirtual aulavirtual > backup_$(date +%Y%m%d).sql
+
+# Restaurar backup
+docker-compose exec -T db psql -U aulavirtual aulavirtual < backup_20260303.sql</code></pre>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-database"></i>
+                    <strong>Backups Automáticos:</strong> Configura un cron job para backups diarios y almacena en S3/cloud storage.
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuario Section -->
+        <div id="usuario-section" class="doc-section" style="display: none;">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showSection('inicio')">Inicio</a></li>
+                    <li class="breadcrumb-item active">Manual de Usuario</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-user-graduate text-primary me-3"></i>
+                Manual del Estudiante
+            </h1>
+            <p class="page-subtitle">
+                Guía completa para estudiantes de Aula Virtual
+            </p>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Comenzar en Aula Virtual</h2>
+
+                <h3 class="subsection-title">1.1 Crear una Cuenta</h3>
+                <ol>
+                    <li>Ve a la página principal</li>
+                    <li>Click en <strong>"Registrarse"</strong></li>
+                    <li>Completa el formulario:
+                        <ul>
+                            <li>Nombre completo</li>
+                            <li>Email (debe ser único)</li>
+                            <li>Contraseña segura (mínimo 8 caracteres)</li>
+                            <li>Selecciona: <span class="badge bg-primary">Estudiante</span></li>
+                        </ul>
+                    </li>
+                    <li>Acepta términos y condiciones</li>
+                    <li>Click en <strong>"Crear Cuenta"</strong></li>
+                    <li>Recibirás un email de confirmación</li>
+                </ol>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>¡Bienvenido!</strong> Tu cuenta está lista. Ahora puedes comenzar a buscar docentes.
+                </div>
+
+                <h3 class="subsection-title">1.2 Completar tu Perfil</h3>
+                <p>Es recomendable completar tu perfil para una mejor experiencia:</p>
+                <ol>
+                    <li>Ve a <strong>Profile → Configuración</strong></li>
+                    <li>Agrega una foto de perfil</li>
+                    <li>Completa tu biografía</li>
+                    <li>Agrega número de teléfono (opcional)</li>
+                </ol>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Buscar y Seleccionar Docentes</h2>
+
+                <h3 class="subsection-title">2.1 Explorar Docentes</h3>
+                <p>En <strong>"Buscar Docentes"</strong> puedes:</p>
+                <ul>
+                    <li><strong>Ver todos los docentes</strong> disponibles</li>
+                    <li><strong>Filtrar por:</strong>
+                        <ul>
+                            <li>Especialidad (Matemáticas, Física, Inglés, etc.)</li>
+                            <li>Rango de precios</li>
+                            <li>Calificación mínima</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ordenar por:</strong>
+                        <ul>
+                            <li>Calificación (mayor a menor)</li>
+                            <li>Precio (menor a mayor)</li>
+                            <li>Experiencia</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title">2.2 Ver Perfil del Docente</h3>
+                <p>Click en cualquier docente para ver:</p>
+                <ul>
+                    <li><strong>Información básica:</strong> Foto, nombre, especialidades</li>
+                    <li><strong>Experiencia:</strong> Años de experiencia, educación</li>
+                    <li><strong>Tarifa:</strong> Precio por hora</li>
+                    <li><strong>Calificación:</strong> Promedio y número de reseñas</li>
+                    <li><strong>Reseñas:</strong> Comentarios de otros estudiantes</li>
+                    <li><strong>Disponibilidad:</strong> Horarios disponibles</li>
+                </ul>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-star"></i>
+                    <strong>Tip:</strong> Lee las reseñas de otros estudiantes para conocer la experiencia de aprendizaje con cada docente.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Reservar una Clase</h2>
+
+                <h3 class="subsection-title">3.1 Proceso de Reserva</h3>
+                <ol>
+                    <li><strong>Seleccionar fecha y hora:</strong>
+                        <ul>
+                            <li>Ve al calendario del docente</li>
+                            <li>Horarios disponibles en verde</li>
+                            <li>Click en el horario deseado</li>
+                        </ul>
+                    </li>
+                    <li><strong>Confirmar detalles:</strong>
+                        <ul>
+                            <li>Fecha y hora</li>
+                            <li>Duración (normalmente 60 minutos)</li>
+                            <li>Precio total</li>
+                        </ul>
+                    </li>
+                    <li><strong>Agregar nota (opcional):</strong>
+                        <ul>
+                            <li>Describe qué quieres aprender</li>
+                            <li>Menciona dificultades específicas</li>
+                            <li>Solicita materiales previos</li>
+                        </ul>
+                    </li>
+                    <li><strong>Proceder al pago</strong></li>
+                </ol>
+
+                <h3 class="subsection-title">3.2 Realizar el Pago</h3>
+                <p>El pago se procesa de forma segura con Stripe:</p>
+                <ol>
+                    <li>Selecciona método de pago:
+                        <ul>
+                            <li>Tarjeta de crédito/débito</li>
+                            <li>PayPal (si está habilitado)</li>
+                        </ul>
+                    </li>
+                    <li>Ingresa datos de la tarjeta:
+                        <ul>
+                            <li>Número de tarjeta</li>
+                            <li>Fecha de vencimiento</li>
+                            <li>CVC</li>
+                        </ul>
+                    </li>
+                    <li>Verifica el monto</li>
+                    <li>Click en <strong>"Pagar"</strong></li>
+                    <li>Confirmación instantánea</li>
+                </ol>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-lock"></i>
+                    <strong>Pago Seguro:</strong> Usamos Stripe, líder mundial en procesamiento de pagos. Tus datos están protegidos con encriptación de nivel bancario.
+                </div>
+
+                <h3 class="subsection-title">3.3 Confirmación</h3>
+                <p>Después del pago:</p>
+                <ul>
+                    <li>✅ Recibes email de confirmación</li>
+                    <li>✅ La clase aparece en tu calendario</li>
+                    <li>✅ El docente recibe notificación</li>
+                    <li>✅ Recordatorio 1 hora antes de la clase</li>
+                    <li>✅ Notificación 15 minutos antes para unirse</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Tomar la Clase</h2>
+
+                <h3 class="subsection-title">4.1 Preparación</h3>
+                <p>Antes de la clase:</p>
+                <ul>
+                    <li>✅ Verifica tu conexión a internet</li>
+                    <li>✅ Prueba tu cámara y micrófono</li>
+                    <li>✅ Ten a mano materiales necesarios</li>
+                    <li>✅ Encuentra un lugar tranquilo</li>
+                    <li>✅ Cierra aplicaciones que consuman ancho de banda</li>
+                </ul>
+
+                <h3 class="subsection-title">4.2 Unirse a la Videollamada</h3>
+                <p>15 minutos antes de la clase:</p>
+                <ol>
+                    <li>Ve a <strong>"Mi Calendario"</strong></li>
+                    <li>Verás el botón <strong>"Unirse a Clase"</strong> activo</li>
+                    <li>Click en el botón</li>
+                    <li>Se abre una nueva ventana con Jitsi Meet</li>
+                    <li>Permite acceso a cámara y micrófono</li>
+                    <li>Espera a que el docente se una</li>
+                </ol>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-video"></i>
+                    <strong>Sistema de Video:</strong> Usamos Jitsi Meet, no necesitas instalar nada. Funciona en cualquier navegador moderno.
+                </div>
+
+                <h3 class="subsection-title">4.3 Durante la Clase</h3>
+                <p><strong>Controles de la videollamada:</strong></p>
+                <ul>
+                    <li><i class="fas fa-microphone"></i> <strong>Micrófono:</strong> Activar/silenciar audio</li>
+                    <li><i class="fas fa-video"></i> <strong>Cámara:</strong> Activar/desactivar video</li>
+                    <li><i class="fas fa-desktop"></i> <strong>Compartir pantalla:</strong> Mostrar tu pantalla</li>
+                    <li><i class="fas fa-comment"></i> <strong>Chat:</strong> Enviar mensajes de texto</li>
+                    <li><i class="fas fa-hand-paper"></i> <strong>Levantar mano:</strong> Solicitar turno</li>
+                    <li><i class="fas fa-cog"></i> <strong>Configuración:</strong> Ajustes de audio/video</li>
+                </ul>
+
+                <p><strong>Buenas prácticas:</strong></p>
+                <ul>
+                    <li>Sé puntual</li>
+                    <li>Mantén tu cámara encendida</li>
+                    <li>Silencia tu micrófono cuando no hables</li>
+                    <li>Participa activamente</li>
+                    <li>Haz preguntas</li>
+                    <li>Toma notas</li>
+                </ul>
+
+                <h3 class="subsection-title">4.4 Finalizar la Clase</h3>
+                <p>Al terminar:</p>
+                <ol>
+                    <li>Agradece al docente</li>
+                    <li>Confirma que entendiste todo</li>
+                    <li>Click en <strong>"Salir"</strong> para abandonar la videollamada</li>
+                    <li>La clase se marca automáticamente como completada</li>
+                </ol>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Después de la Clase</h2>
+
+                <h3 class="subsection-title">5.1 Dejar una Reseña</h3>
+                <p>Es importante calificar al docente:</p>
+                <ol>
+                    <li>Recibirás una notificación para dejar reseña</li>
+                    <li>O ve a <strong>"Mis Clases"</strong> → Click en "Dejar Reseña"</li>
+                    <li>Califica de 1 a 5 estrellas:
+                        <ul>
+                            <li>⭐ Muy malo</li>
+                            <li>⭐⭐ Malo</li>
+                            <li>⭐⭐⭐ Regular</li>
+                            <li>⭐⭐⭐⭐ Bueno</li>
+                            <li>⭐⭐⭐⭐⭐ Excelente</li>
+                        </ul>
+                    </li>
+                    <li>Escribe un comentario (opcional pero recomendado)</li>
+                    <li>Click en <strong>"Enviar Reseña"</strong></li>
+                </ol>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-heart"></i>
+                    <strong>Ayuda a la comunidad:</strong> Tus reseñas honestas ayudan a otros estudiantes a elegir buenos docentes.
+                </div>
+
+                <h3 class="subsection-title">5.2 Acceder a Materiales</h3>
+                <p>Si el docente compartió materiales:</p>
+                <ol>
+                    <li>Ve a <strong>"Mis Clases"</strong></li>
+                    <li>Click en la clase completada</li>
+                    <li>Sección <strong>"Materiales"</strong></li>
+                    <li>Descarga PDFs, documentos, links, etc.</li>
+                </ol>
+
+                <h3 class="subsection-title">5.3 Programar Nueva Clase</h3>
+                <p>Si te gustó el docente:</p>
+                <ul>
+                    <li>Click en <strong>"Reservar Otra Clase"</strong> desde el perfil</li>
+                    <li>O marca como <strong>"Favorito"</strong> para encontrarlo fácilmente</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">6. Política de Cancelación</h2>
+
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Tiempo antes de la clase</th>
+                                <th>Reembolso</th>
+                                <th>Penalización</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Más de 24 horas</td>
+                                <td><span class="badge bg-success">100%</span></td>
+                                <td>Ninguna</td>
+                            </tr>
+                            <tr>
+                                <td>Entre 12-24 horas</td>
+                                <td><span class="badge bg-warning">50%</span></td>
+                                <td>Ninguna</td>
+                            </tr>
+                            <tr>
+                                <td>Menos de 12 horas</td>
+                                <td><span class="badge bg-danger">0%</span></td>
+                                <td>No se reembolsa</td>
+                            </tr>
+                            <tr>
+                                <td>Docente no se presenta</td>
+                                <td><span class="badge bg-success">100%</span> + crédito</td>
+                                <td>Ninguna para estudiante</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">Cómo Cancelar</h3>
+                <ol>
+                    <li>Ve a <strong>"Mi Calendario"</strong></li>
+                    <li>Busca la clase que deseas cancelar</li>
+                    <li>Click en <strong>"Cancelar Clase"</strong></li>
+                    <li>Confirma la cancelación</li>
+                    <li>El reembolso se procesa automáticamente según la política</li>
+                </ol>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> Cancela con la mayor anticipación posible para evitar pérdida de dinero y permitir que el docente reorganice su agenda.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">7. Preguntas Frecuentes (FAQ)</h2>
+
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                ¿Cómo funciona el pago?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Los pagos se procesan de forma segura con Stripe. Aceptamos tarjetas de crédito y débito. El cobro se realiza al momento de la reserva. Si cancelas con anticipación suficiente, el reembolso es automático.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                ¿Qué pasa si tengo problemas técnicos?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Si tienes problemas para unirte a la videollamada, primero verifica tu conexión a internet. Si el problema persiste, contacta a soporte inmediatamente. Si los problemas técnicos impiden la clase, puedes solicitar reembolso completo o reprogramación.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                ¿Puedo grabar las clases?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Solo puedes grabar las clases con el consentimiento expreso del docente. Es importante respetar los derechos de privacidad y propiedad intelectual. Pregunta al docente antes de la clase si permite grabación.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                ¿Qué hago si no estoy satisfecho con una clase?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Primero, intenta resolver el problema directamente con el docente. Si no es posible, contacta a soporte dentro de las 24 horas posteriores a la clase. Revisaremos el caso y evaluaremos si corresponde un reembolso parcial o total.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Docente Section -->
+        <div id="docente-section" class="doc-section" style="display: none;">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showSection('inicio')">Inicio</a></li>
+                    <li class="breadcrumb-item active">Manual de Docente</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-chalkboard-teacher text-success me-3"></i>
+                Manual del Docente
+            </h1>
+            <p class="page-subtitle">
+                Guía completa para docentes de Aula Virtual
+            </p>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Empezar como Docente</h2>
+
+                <h3 class="subsection-title">1.1 Registrarse</h3>
+                <ol>
+                    <li>Ve a la página principal</li>
+                    <li>Click en <strong>"Registrarse"</strong></li>
+                    <li>Selecciona rol: <span class="badge bg-success">Docente</span></li>
+                    <li>Completa el formulario básico</li>
+                    <li>Verifica tu email</li>
+                </ol>
+
+                <h3 class="subsection-title">1.2 Completar Perfil Profesional</h3>
+                <p>Después del registro, debes completar tu perfil:</p>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> No podrás recibir estudiantes hasta que tu perfil sea verificado por el administrador.
+                </div>
+
+                <p><strong>Información requerida:</strong></p>
+                <ul>
+                    <li><strong>Foto de perfil:</strong> Profesional, clara, actual</li>
+                    <li><strong>Especialidades:</strong> Máximo 3-5 áreas de especialización</li>
+                    <li><strong>Descripción:</strong> Resume tu experiencia y método de enseñanza (200-500 palabras)</li>
+                    <li><strong>Experiencia:</strong> Años enseñando, cargos previos</li>
+                    <li><strong>Educación:</strong> Títulos, certificaciones, cursos</li>
+                    <li><strong>Precio por hora:</strong> Tarifa en USD (puedes cambiarla después)</li>
+                </ul>
+
+                <h3 class="subsection-title">1.3 Verificación</h3>
+                <p>El proceso de verificación toma 1-3 días hábiles:</p>
+                <ol>
+                    <li>El equipo admin revisa tu perfil</li>
+                    <li>Verifican tus credenciales</li>
+                    <li>Pueden solicitar documentos adicionales</li>
+                    <li>Recibes notificación de aprobación o rechazo</li>
+                    <li>Si apruebas, ¡ya puedes empezar a recibir estudiantes!</li>
+                </ol>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Tips para aprobación rápida:</strong>
+                    <ul class="mb-0">
+                        <li>Completa todos los campos requeridos</li>
+                        <li>Usa una foto profesional</li>
+                        <li>Describe claramente tu experiencia</li>
+                        <li>Adjunta certificados si los tienes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Configurar Disponibilidad</h2>
+
+                <h3 class="subsection-title">2.1 Crear Horarios</h3>
+                <p>Ve a <strong>"Calendario" → "Configurar Disponibilidad"</strong>:</p>
+                <ol>
+                    <li>Selecciona días de la semana</li>
+                    <li>Define rangos horarios (ej: Lunes 9:00-17:00)</li>
+                    <li>Puedes crear múltiples bloques por día</li>
+                    <li>Los estudiantes solo podrán reservar en estos horarios</li>
+                </ol>
+
+                <p><strong>Ejemplo de configuración:</strong></p>
+                <pre><code>Lunes: 09:00-12:00, 14:00-18:00
+Martes: 10:00-13:00, 15:00-19:00
+Miércoles: Día libre
+Jueves: 09:00-17:00 (corrido)
+Viernes: 08:00-12:00
+Sábado: 10:00-14:00
+Domingo: Cerrado</code></pre>
+
+                <h3 class="subsection-title">2.2 Bloquear Fechas Específicas</h3>
+                <p>Para vacaciones o días no disponibles:</p>
+                <ol>
+                    <li>Ve al calendario</li>
+                    <li>Click en el día que quieres bloquear</li>
+                    <li>Selecciona <strong>"Bloquear día completo"</strong></li>
+                    <li>O bloquea solo ciertas horas</li>
+                </ol>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-calendar-alt"></i>
+                    <strong>Flexibilidad:</strong> Puedes cambiar tu disponibilidad en cualquier momento, pero respeta las clases ya reservadas.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Gestionar Clases</h2>
+
+                <h3 class="subsection-title">3.1 Recibir Reservas</h3>
+                <p>Cuando un estudiante reserva:</p>
+                <ul>
+                    <li>✅ Recibes email de notificación</li>
+                    <li>✅ Aparece en tu calendario</li>
+                    <li>✅ Ves información del estudiante</li>
+                    <li>✅ Puedes revisar su nota/mensaje</li>
+                </ul>
+
+                <h3 class="subsection-title">3.2 Preparar la Clase</h3>
+                <p>Antes de la clase:</p>
+                <ol>
+                    <li>Lee la nota del estudiante (si la dejó)</li>
+                    <li>Prepara materiales relevantes</li>
+                    <li>Planifica la estructura de la clase</li>
+                    <li>Prueba tu equipo (cámara, micrófono, internet)</li>
+                </ol>
+
+                <h3 class="subsection-title">3.3 Impartir la Clase</h3>
+                <p>15 minutos antes:</p>
+                <ol>
+                    <li>Ve a <strong>"Mi Calendario"</strong></li>
+                    <li>Click en <strong>"Unirse a Clase"</strong></li>
+                    <li>Se abre Jitsi Meet</li>
+                    <li>Espera al estudiante</li>
+                    <li>Comienza puntualmente</li>
+                </ol>
+
+                <p><strong>Durante la clase:</strong></p>
+                <ul>
+                    <li>Sé puntual y profesional</li>
+                    <li>Usa la pizarra virtual si es necesario</li>
+                    <li>Comparte pantalla para mostrar materiales</li>
+                    <li>Mantén una actitud positiva</li>
+                    <li>Adapta tu ritmo al estudiante</li>
+                    <li>Deja tiempo para preguntas</li>
+                </ul>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Tips para clases efectivas:</strong>
+                    <ul class="mb-0">
+                        <li>Pregunta qué quiere lograr el estudiante</li>
+                        <li>Explica con ejemplos prácticos</li>
+                        <li>Verifica comprensión frecuentemente</li>
+                        <li>Asigna pequeñas tareas si es apropiado</li>
+                        <li>Resume los puntos clave al final</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">3.4 Después de la Clase</h3>
+                <ol>
+                    <li>La clase se marca automáticamente como completada</li>
+                    <li>Puedes subir materiales adicionales</li>
+                    <li>El pago se libera después de 24-48 horas</li>
+                    <li>El estudiante puede dejarte una reseña</li>
+                </ol>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Gestión Financiera</h2>
+
+                <h3 class="subsection-title">4.1 Tus Ganancias</h3>
+                <p>Estructura de comisiones:</p>
+                <ul>
+                    <li><strong>Estudiante paga:</strong> $50 (ejemplo)</li>
+                    <li><strong>Comisión de plataforma:</strong> -$7.50 (15%)</li>
+                    <li><strong>Tú recibes:</strong> $42.50 (85%)</li>
+                </ul>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-dollar-sign"></i>
+                    <strong>Ganancias:</strong> Recibes el 85% de cada clase. La comisión del 15% cubre costos de plataforma, pagos, soporte y marketing.
+                </div>
+
+                <h3 class="subsection-title">4.2 Panel de Finanzas</h3>
+                <p>En <strong>"Finanzas"</strong> puedes ver:</p>
+                <ul>
+                    <li><strong>Saldo Disponible:</strong> Dinero listo para retirar</li>
+                    <li><strong>Saldo Pendiente:</strong> De clases completadas hace menos de 48h</li>
+                    <li><strong>Total Ingresos:</strong> Histórico completo</li>
+                    <li><strong>Ingresos del Mes:</strong> Ganancias actuales</li>
+                    <li><strong>Transacciones:</strong> Historial detallado</li>
+                    <li><strong>Retiros:</strong> Historial de pagos recibidos</li>
+                </ul>
+
+                <h3 class="subsection-title">4.3 Solicitar Retiro</h3>
+                <p><strong>Requisitos:</strong></p>
+                <ul>
+                    <li>Mínimo: $50 USD</li>
+                    <li>Frecuencia: 1 vez por semana</li>
+                    <li>Método configurado previamente</li>
+                </ul>
+
+                <p><strong>Proceso:</strong></p>
+                <ol>
+                    <li>Ve a <strong>"Finanzas" → "Solicitar Retiro"</strong></li>
+                    <li>Verifica tu método de pago configurado</li>
+                    <li>Ingresa el monto a retirar</li>
+                    <li>Confirma la solicitud</li>
+                    <li>Procesamiento: próximo viernes</li>
+                    <li>Recibirás el pago en 3-5 días hábiles</li>
+                </ol>
+
+                <h3 class="subsection-title">4.4 Configurar Método de Pago</h3>
+                <p>En <strong>"Configuración" → "Métodos de Pago"</strong>:</p>
+
+                <p><strong>Opciones disponibles:</strong></p>
+                <ul>
+                    <li><strong>Transferencia Bancaria:</strong>
+                        <ul>
+                            <li>Nombre del banco</li>
+                            <li>Número de cuenta</li>
+                            <li>Nombre del titular</li>
+                            <li>Identificación fiscal</li>
+                        </ul>
+                    </li>
+                    <li><strong>PayPal:</strong>
+                        <ul>
+                            <li>Email de PayPal</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> Verifica que tus datos de pago sean correctos. Errores pueden causar demoras en los retiros.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Construir tu Reputación</h2>
+
+                <h3 class="subsection-title">5.1 Sistema de Calificaciones</h3>
+                <p>Después de cada clase, los estudiantes pueden calificarte:</p>
+                <ul>
+                    <li><strong>1-2 estrellas:</strong> Mala experiencia</li>
+                    <li><strong>3 estrellas:</strong> Regular</li>
+                    <li><strong>4 estrellas:</strong> Buena experiencia</li>
+                    <li><strong>5 estrellas:</strong> Excelente experiencia</li>
+                </ul>
+
+                <p>Tu <strong>calificación promedio</strong> se muestra en tu perfil y afecta tu visibilidad en las búsquedas.</p>
+
+                <h3 class="subsection-title">5.2 Reseñas</h3>
+                <p>Las reseñas positivas son cruciales:</p>
+                <ul>
+                    <li>Aumentan tu credibilidad</li>
+                    <li>Mejoran tu posición en resultados de búsqueda</li>
+                    <li>Atraen más estudiantes</li>
+                    <li>Justifican precios más altos</li>
+                </ul>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-star"></i>
+                    <strong>Cómo obtener buenas reseñas:</strong>
+                    <ul class="mb-0">
+                        <li>Sé siempre puntual</li>
+                        <li>Prepara bien tus clases</li>
+                        <li>Sé paciente y amable</li>
+                        <li>Adapta tu método al estudiante</li>
+                        <li>Proporciona valor adicional (materiales, consejos)</li>
+                        <li>Pide feedback durante la clase</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">5.3 Responder a Reseñas</h3>
+                <p>Puedes responder a las reseñas de los estudiantes:</p>
+                <ol>
+                    <li>Ve a tu perfil</li>
+                    <li>Sección "Reseñas"</li>
+                    <li>Click en "Responder" bajo cada reseña</li>
+                </ol>
+
+                <p><strong>Tips para responder:</strong></p>
+                <ul>
+                    <li><strong>Reseñas positivas:</strong> Agradece sinceramente</li>
+                    <li><strong>Reseñas negativas:</strong> Mantén la calma, sé profesional, ofrece soluciones</li>
+                    <li>No seas defensivo</li>
+                    <li>Muestra que valoras el feedback</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">6. Mejores Prácticas</h2>
+
+                <h3 class="subsection-title">6.1 Profesionalismo</h3>
+                <ul>
+                    <li>✅ Mantén actualizado tu perfil</li>
+                    <li>✅ Responde mensajes en menos de 24h</li>
+                    <li>✅ Sé puntual siempre</li>
+                    <li>✅ Viste apropiadamente</li>
+                    <li>✅ Ten un espacio ordenado y bien iluminado</li>
+                    <li>✅ Cumple lo prometido en tu perfil</li>
+                </ul>
+
+                <h3 class="subsection-title">6.2 Comunicación</h3>
+                <ul>
+                    <li>✅ Habla claro y a buen ritmo</li>
+                    <li>✅ Escucha activamente</li>
+                    <li>✅ Haz preguntas para verificar comprensión</li>
+                    <li>✅ Sé paciente con preguntas</li>
+                    <li>✅ Usa lenguaje apropiado para el nivel del estudiante</li>
+                </ul>
+
+                <h3 class="subsection-title">6.3 Técnica</h3>
+                <ul>
+                    <li>✅ Internet estable (mínimo 10 Mbps)</li>
+                    <li>✅ Micrófono de calidad</li>
+                    <li>✅ Cámara HD si es posible</li>
+                    <li>✅ Iluminación frontal adecuada</li>
+                    <li>✅ Evita ruidos de fondo</li>
+                    <li>✅ Ten plan B si falla la tecnología</li>
+                </ul>
+
+                <h3 class="subsection-title">6.4 Maximizar Ingresos</h3>
+                <ul>
+                    <li><strong>Optimiza tu disponibilidad:</strong> Más horarios = más oportunidades</li>
+                    <li><strong>Ajusta precios:</strong> Empieza competitivo, sube con buenas reseñas</li>
+                    <li><strong>Ofrece paquetes:</strong> Descuentos por múltiples clases</li>
+                    <li><strong>Especialízate:</strong> Nichos específicos pueden cobrar más</li>
+                    <li><strong>Promociona:</strong> Comparte tu perfil en redes sociales</li>
+                </ul>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-trophy"></i>
+                    <strong>Programa de Docentes Destacados:</strong> Docentes con excelente desempeño reciben badges especiales y mejor visibilidad en la plataforma.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">7. Preguntas Frecuentes (FAQ)</h2>
+
+                <div class="accordion" id="faqDocenteAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqd1">
+                                ¿Cuánto gano por clase?
+                            </button>
+                        </h2>
+                        <div id="faqd1" class="accordion-collapse collapse show" data-bs-parent="#faqDocenteAccordion">
+                            <div class="accordion-body">
+                                Recibes el 85% del precio que cobras. Por ejemplo, si tu tarifa es $50/hora, recibirás $42.50 por clase. La comisión del 15% cubre infraestructura, pagos, soporte y marketing.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqd2">
+                                ¿Qué hago si un estudiante no se presenta?
+                            </button>
+                        </h2>
+                        <div id="faqd2" class="accordion-collapse collapse" data-bs-parent="#faqDocenteAccordion">
+                            <div class="accordion-body">
+                                Espera 15 minutos. Si el estudiante no se une, marca la clase como "No Show". El pago se libera a tu favor automáticamente. El estudiante no recibe reembolso por inasistencia.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqd3">
+                                ¿Puedo cambiar mis precios?
+                            </button>
+                        </h2>
+                        <div id="faqd3" class="accordion-collapse collapse" data-bs-parent="#faqDocenteAccordion">
+                            <div class="accordion-body">
+                                Sí, puedes cambiar tu tarifa en cualquier momento desde "Configuración → Perfil de Docente". Los cambios solo afectan nuevas reservas, no las ya programadas.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqd4">
+                                ¿Cuánto tiempo toma la verificación?
+                            </button>
+                        </h2>
+                        <div id="faqd4" class="accordion-collapse collapse" data-bs-parent="#faqDocenteAccordion">
+                            <div class="accordion-body">
+                                Normalmente 1-3 días hábiles. Si enviaste toda la información correctamente, suele ser más rápido. Si faltan documentos o hay dudas, puede tomar un poco más.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QA Section -->
+        <div id="qa-section" class="doc-section" style="display: none;">
+            <nav aria-label="breadcrumb" class="breadcrumb-custom">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showSection('inicio')">Inicio</a></li>
+                    <li class="breadcrumb-item active">QA y Testing</li>
+                </ol>
+            </nav>
+
+            <h1 class="page-title">
+                <i class="fas fa-check-double text-warning me-3"></i>
+                Manual de QA y Testing
+            </h1>
+            <p class="page-subtitle">
+                Guía completa para pruebas y aseguramiento de calidad
+            </p>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Tests Funcionales</h2>
+
+                <h3 class="subsection-title">1.1 Autenticación</h3>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Test Case</th>
+                                <th>Pasos</th>
+                                <th>Resultado Esperado</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Registro exitoso</strong></td>
+                                <td>
+                                    1. Ir a /register<br>
+                                    2. Completar formulario<br>
+                                    3. Submit
+                                </td>
+                                <td>Usuario creado, redirect a login</td>
+                                <td><span class="badge bg-success">✓ Pass</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email duplicado</strong></td>
+                                <td>
+                                    1. Registrar con email existente
+                                </td>
+                                <td>Error: "Email ya registrado"</td>
+                                <td><span class="badge bg-success">✓ Pass</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Login correcto</strong></td>
+                                <td>
+                                    1. Email y password válidos<br>
+                                    2. Submit
+                                </td>
+                                <td>Redirect a dashboard</td>
+                                <td><span class="badge bg-success">✓ Pass</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Login incorrecto</strong></td>
+                                <td>
+                                    1. Password incorrecto
+                                </td>
+                                <td>Error: "Credenciales inválidas"</td>
+                                <td><span class="badge bg-success">✓ Pass</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>2FA setup</strong></td>
+                                <td>
+                                    1. Ir a configuración<br>
+                                    2. Activar 2FA<br>
+                                    3. Escanear QR
+                                </td>
+                                <td>2FA activado, códigos de backup generados</td>
+                                <td><span class="badge bg-success">✓ Pass</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">1.2 Reserva de Clases</h3>
+                <pre><code class="language-python"># Test automatizado de reserva
+def test_reservar_clase():
+    # Login como estudiante
+    login(email="estudiante@test.com", password="test123")
+    
+    # Buscar docente
+    docente = buscar_docente(especialidad="Matemáticas")
+    
+    # Seleccionar horario
+    horario = docente.horarios_disponibles[0]
+    
+    # Realizar pago (tarjeta de prueba)
+    pago = procesar_pago(
+        numero="4242424242424242",
+        fecha="12/25",
+        cvc="123"
+    )
+    
+    # Verificar reserva creada
+    assert pago.exitoso == True
+    assert clase.estado == "confirmada"
+    assert docente.recibio_notificacion == True</code></pre>
+
+                <h3 class="subsection-title">1.3 Pagos con Stripe</h3>
+                <p><strong>Tarjetas de prueba:</strong></p>
+                <pre><code># Pago exitoso
+4242 4242 4242 4242
+
+# Pago declinado
+4000 0000 0000 0002
+
+# Requiere autenticación
+4000 0025 0000 3155
+
+# Fondos insuficientes
+4000 0000 0000 9995</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Tests de Seguridad</h2>
+
+                <h3 class="subsection-title">2.1 Checklist de Seguridad</h3>
+                <ul class="checklist">
+                    <li>Contraseñas hasheadas con bcrypt</li>
+                    <li>HTTPS en producción</li>
+                    <li>CSRF tokens en formularios</li>
+                    <li>SQL injection prevención</li>
+                    <li>XSS prevención</li>
+                    <li>Rate limiting en API</li>
+                    <li>2FA disponible</li>
+                    <li>Sesiones seguras</li>
+                    <li>Variables sensibles en .env</li>
+                    <li>Validación de inputs</li>
+                </ul>
+
+                <h3 class="subsection-title">2.2 Tests de Penetración</h3>
+                <pre><code class="language-bash"># SQL Injection
+' OR '1'='1
+' DROP TABLE usuarios--
+
+# XSS
+<script>alert('XSS')</script>
+<img src=x onerror=alert('XSS')>
+
+# Path Traversal
+../../etc/passwd
+..\..\windows\system32\config\sam
+
+# CSRF
+<form action="http://aulavirtual.com/delete-account" method="POST">
+    <input type="submit" value="Click me">
+</form></code></pre>
+
+                <div class="alert alert-custom alert-danger">
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Todos estos intentos deben ser bloqueados</strong> por las defensas del sistema.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Tests de Performance</h2>
+
+                <h3 class="subsection-title">3.1 Load Testing</h3>
+                <pre><code class="language-bash"># Usar Apache Bench
+ab -n 1000 -c 50 http://localhost/
+
+# Usar Locust
+locustfile configure 1000 users, spawn rate 50/s</code></pre>
+
+                <h3 class="subsection-title">3.2 Métricas Esperadas</h3>
+                <ul>
+                    <li><strong>Tiempo de carga inicial:</strong> &lt; 2s</li>
+                    <li><strong>Tiempo de respuesta API:</strong> &lt; 500ms</li>
+                    <li><strong>Usuarios concurrentes:</strong> 500+</li>
+                    <li><strong>Uptime:</strong> 99.9%</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Checklist Pre-Despliegue</h2>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-tasks"></i>
+                    <strong>Completar antes de lanzar a producción:</strong>
+                </div>
+
+                <h3 class="subsection-title">4.1 Configuración</h3>
+                <ul class="checklist">
+                    <li>Variable SECRET_KEY única y segura</li>
+                    <li>DEBUG=False en producción</li>
+                    <li>HTTPS habilitado</li>
+                    <li>Dominio configurado</li>
+                    <li>Claves de Stripe (modo live)</li>
+                    <li>SMTP configurado</li>
+                    <li>Backups automáticos</li>
+                </ul>
+
+                <h3 class="subsection-title">4.2 Funcionalidad</h3>
+                <ul class="checklist">
+                    <li>Registro y login funcional</li>
+                    <li>2FA funcionando</li>
+                    <li>Búsqueda de docentes operativa</li>
+                    <li>Reservas procesan correctamente</li>
+                    <li>Pagos con Stripe funcionando</li>
+                    <li>Videollamadas Jitsi operativas</li>
+                    <li>Emails se envían</li>
+                    <li>Reseñas se guardan</li>
+                    <li>Dashboard muestra datos correctos</li>
+                    <li>Panel admin accesible</li>
+                </ul>
+
+                <h3 class="subsection-title">4.3 Performance</h3>
+                <ul class="checklist">
+                    <li>Páginas cargan en &lt;2s</li>
+                    <li>Sin memory leaks</li>
+                    <li>Queries optimizadas</li>
+                    <li>Assets comprimidos</li>
+                    <li>CDN para archivos estáticos</li>
+                </ul>
+
+                <h3 class="subsection-title">4.4 SEO y Analytics</h3>
+                <ul class="checklist">
+                    <li>Meta tags configurados</li>
+                    <li>Sitemap generado</li>
+                    <li>robots.txt configurado</li>
+                    <li>Google Analytics integrado</li>
+                    <li>Schema.org markup</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Seguridad Section -->
+        <div id="seguridad-section" class="doc-section" style="display: none;">
+            <h1 class="page-title">Seguridad</h1>
+            
+            <div class="breadcrumb-nav">
+                <i class="fas fa-home"></i> / Referencias / Seguridad
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Autenticación y Autorización</h2>
+
+                <h3 class="subsection-title">1.1 Sistema de Autenticación</h3>
+                
+                <h4>Hashing de Contraseñas</h4>
+                <p>Las contraseñas se almacenan usando <strong>Werkzeug PBKDF2-SHA256</strong> con salts automáticos:</p>
+                <pre><code class="language-python"># En models.py
+from werkzeug.security import generate_password_hash, check_password_hash
+
+def set_password(self, password):
+    """Establecer contraseña hasheada"""
+    self.password_hash = generate_password_hash(password)
+
+def check_password(self, password):
+    """Verificar contraseña"""
+    return check_password_hash(self.password_hash, password)</code></pre>
+
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Seguro:</strong> PBKDF2 con 260,000 iteraciones + salt único por contraseña.
+                </div>
+
+                <h4>Política de Contraseñas</h4>
+                <ul>
+                    <li>Mínimo 8 caracteres</li>
+                    <li>No se almacena texto plano</li>
+                    <li>Tokens de recuperación expiran en 1 hora</li>
+                    <li>Verificación por email obligatoria</li>
+                </ul>
+
+                <h3 class="subsection-title">1.2 Autenticación de Dos Factores (2FA)</h3>
+                
+                <p>Implementación completa de 2FA usando <strong>TOTP (Time-based One-Time Password)</strong>:</p>
+                
+                <pre><code class="language-python"># Configuración 2FA
+import pyotp
+import qrcode
+
+def generate_totp_secret(self):
+    """Generar secreto para 2FA"""
+    if not self.totp_secret:
+        self.totp_secret = base64.b32encode(os.urandom(10)).decode('utf-8')
+    return self.totp_secret
+
+def verify_totp(self, token):
+    """Verificar token TOTP"""
+    totp = pyotp.TOTP(self.totp_secret)
+    return totp.verify(token, valid_window=1)
+
+def generate_backup_codes(self):
+    """Generar 10 códigos de respaldo"""
+    codes = []
+    for _ in range(10):
+        code = secrets.token_hex(4).upper()
+        codes.append(code)
+    self.backup_codes = ','.join([generate_password_hash(c) for c in codes])
+    return codes</code></pre>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Característica</th>
+                                <th>Implementación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Aplicaciones compatibles</strong></td>
+                                <td>Google Authenticator, Authy, Microsoft Authenticator</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Códigos de respaldo</strong></td>
+                                <td>10 códigos únicos, un solo uso</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ventana de validez</strong></td>
+                                <td>±30 segundos (valid_window=1)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>QR Code</strong></td>
+                                <td>Generado automáticamente para easy setup</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">1.3 Roles y Permisos</h3>
+                
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Rol</th>
+                                <th>Permisos</th>
+                                <th>Acceso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-danger">Admin</span></td>
+                                <td>Gestión completa del sistema</td>
+                                <td>Panel admin, usuarios, docentes, pagos, reportes</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-primary">Docente</span></td>
+                                <td>Gestión de clases y perfil</td>
+                                <td>Dashboard docente, mis clases, finanzas, perfil</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-success">Cliente</span></td>
+                                <td>Reserva de clases</td>
+                                <td>Dashboard cliente, buscar docentes, mis clases</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <pre><code class="language-python"># Decorador para proteger rutas admin
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.rol != 'admin':
+            flash('Acceso no autorizado.', 'danger')
+            return redirect(url_for('main.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Uso en rutas
+@admin_bp.route('/dashboard')
+@login_required
+@admin_required
+def dashboard():
+    # Solo accesible por administradores
+    pass</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Seguridad en Sesiones</h2>
+
+                <h3 class="subsection-title">2.1 Configuración de Cookies</h3>
+                
+                <pre><code class="language-python"># En config.py
+SESSION_COOKIE_SECURE = True  # Solo HTTPS en producción
+SESSION_COOKIE_HTTPONLY = True  # No accesible desde JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protección CSRF
+PERMANENT_SESSION_LIFETIME = timedelta(hours=24)</code></pre>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Atributo</th>
+                                <th>Valor</th>
+                                <th>Protección</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Secure</code></td>
+                                <td>True</td>
+                                <td>Solo transmisión por HTTPS</td>
+                            </tr>
+                            <tr>
+                                <td><code>HttpOnly</code></td>
+                                <td>True</td>
+                                <td>No accesible por JavaScript (XSS)</td>
+                            </tr>
+                            <tr>
+                                <td><code>SameSite</code></td>
+                                <td>Lax</td>
+                                <td>Protección contra CSRF</td>
+                            </tr>
+                            <tr>
+                                <td><code>Max-Age</code></td>
+                                <td>24 horas</td>
+                                <td>Expiración automática</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">2.2 Tokens de Recuperación</h3>
+                
+                <pre><code class="language-python"># Generación de token seguro
+from itsdangerous import URLSafeTimedSerializer
+
+def generate_reset_token(usuario):
+    """Generar token para resetear contraseña"""
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(usuario.email, salt='password-reset-salt')
+
+def verify_reset_token(token, expiration=3600):
+    """Verificar token (expira en 1 hora)"""
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
+    except:
+        return None
+    return Usuario.query.filter_by(email=email).first()</code></pre>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> Los tokens de recuperación expiran en 1 hora por seguridad.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Protección contra Ataques</h2>
+
+                <h3 class="subsection-title">3.1 SQL Injection</h3>
+                
+                <div class="alert alert-custom alert-success">
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Protegido:</strong> Uso exclusivo de SQLAlchemy ORM, todas las queries son parametrizadas.
+                </div>
+
+                <pre><code class="language-python"># ✅ SEGURO - SQLAlchemy ORM
+usuario = Usuario.query.filter_by(email=email).first()
+docentes = Docente.query.filter(Docente.especialidad.ilike(f'%{busqueda}%')).all()
+
+# ❌ INSEGURO - NO USAR
+cursor.execute(f"SELECT * FROM usuarios WHERE email = '{email}'")</code></pre>
+
+                <h3 class="subsection-title">3.2 Cross-Site Scripting (XSS)</h3>
+                
+                <p>Jinja2 auto-escapa todas las variables por defecto:</p>
+                
+                <pre><code class="language-html">&lt;!-- ✅ SEGURO - Auto-escaped --&gt;
+&lt;p&gt;{{ usuario.nombre }}&lt;/p&gt;
+
+&lt;!-- ❌ PELIGROSO - Solo si confías 100% en el contenido --&gt;
+&lt;div&gt;{{ contenido_html|safe }}&lt;/div&gt;</code></pre>
+
+                <h3 class="subsection-title">3.3 Cross-Site Request Forgery (CSRF)</h3>
+                
+                <p>Protección mediante Flask-WTF y SameSite cookies:</p>
+                
+                <pre><code class="language-python"># En formularios
+from flask_wtf import FlaskForm
+
+class LoginForm(FlaskForm):
+    # Token CSRF automático
+    pass</code></pre>
+
+                <pre><code class="language-html">&lt;!-- En templates --&gt;
+&lt;form method="POST"&gt;
+    {{ form.hidden_tag() }}
+    &lt;!-- Genera token CSRF automáticamente --&gt;
+&lt;/form&gt;</code></pre>
+
+                <h3 class="subsection-title">3.4 Rate Limiting</h3>
+                
+                <p>Nginx configurado con rate limiting para prevenir ataques DDoS:</p>
+                
+                <pre><code class="language-nginx"># nginx.conf
+limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
+
+location / {
+    limit_req zone=general burst=20 nodelay;
+}
+
+location /api/ {
+    limit_req zone=api burst=10 nodelay;
+}</code></pre>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Zona</th>
+                                <th>Rate</th>
+                                <th>Burst</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>General</td>
+                                <td>10 req/s</td>
+                                <td>20</td>
+                            </tr>
+                            <tr>
+                                <td>API</td>
+                                <td>30 req/s</td>
+                                <td>10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">3.5 Validación de Inputs</h3>
+                
+                <pre><code class="language-python"># Validación de email
+from email_validator import validate_email, EmailNotValidError
+
+try:
+    valid = validate_email(email)
+    email = valid.email
+except EmailNotValidError as e:
+    flash('Email inválido', 'danger')
+
+# Validación de archivos
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx'}
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename, allowed_extensions):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Seguridad en Producción</h2>
+
+                <h3 class="subsection-title">4.1 HTTPS y SSL/TLS</h3>
+                
+                <pre><code class="language-nginx"># Configuración SSL en nginx
+listen 443 ssl http2;
+ssl_certificate /etc/nginx/ssl/cert.pem;
+ssl_certificate_key /etc/nginx/ssl/key.pem;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers HIGH:!aNULL:!MD5;
+ssl_prefer_server_ciphers on;
+
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    return 301 https://$server_name$request_uri;
+}</code></pre>
+
+                <h3 class="subsection-title">4.2 Security Headers</h3>
+                
+                <pre><code class="language-nginx"># Headers de seguridad
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;</code></pre>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Protección</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>HSTS</code></td>
+                                <td>Fuerza HTTPS durante 1 año</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Frame-Options</code></td>
+                                <td>Previene clickjacking</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Content-Type-Options</code></td>
+                                <td>Previene MIME sniffing</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-XSS-Protection</code></td>
+                                <td>Activa filtro XSS del navegador</td>
+                            </tr>
+                            <tr>
+                                <td><code>Referrer-Policy</code></td>
+                                <td>Controla información de referrer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">4.3 Variables de Entorno</h3>
+                
+                <div class="alert alert-custom alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>NUNCA</strong> commitear archivos .env al repositorio. Usar .gitignore.
+                </div>
+
+                <pre><code class="language-bash"># .env (NO commitear)
+SECRET_KEY=tu-clave-super-secreta-aleatoria
+DATABASE_URL=postgresql://user:pass@localhost/db
+STRIPE_SECRET_KEY=sk_live_...
+MAIL_PASSWORD=...
+
+# .gitignore
+.env
+.env.local
+*.pyc
+__pycache__/</code></pre>
+
+                <h3 class="subsection-title">4.4 Monitoreo y Logging</h3>
+                
+                <pre><code class="language-python"># Logging de eventos de seguridad
+import logging
+
+# Intentos de login fallidos
+app.logger.warning(f'Login fallido para: {email} desde {ip}')
+
+# Accesos no autorizados
+app.logger.error(f'Intento de acceso no autorizado: {user} a {url}')
+
+# Errores críticos
+app.logger.critical(f'Error de seguridad: {error}')</code></pre>
+
+                <h4>Eventos a Monitorear:</h4>
+                <ul>
+                    <li>Múltiples intentos de login fallidos (posible ataque de fuerza bruta)</li>
+                    <li>Accesos denegados por permisos</li>
+                    <li>Cambios en configuración de seguridad</li>
+                    <li>Activación/desactivación de 2FA</li>
+                    <li>Cambios de contraseña</li>
+                    <li>Patrones anormales de tráfico</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Checklist de Seguridad</h2>
+
+                <h3 class="subsection-title">Antes de Producción</h3>
+                
+                <ul class="checklist">
+                    <li>✓ Contraseñas hasheadas (PBKDF2/bcrypt)</li>
+                    <li>✓ HTTPS configurado (SSL/TLS 1.2+)</li>
+                    <li>✓ Sesiones seguras (Secure, HttpOnly, SameSite)</li>
+                    <li>✓ CSRF protection activada</li>
+                    <li>✓ SQL Injection prevención (ORM)</li>
+                    <li>✓ XSS prevención (auto-escape)</li>
+                    <li>✓ Rate limiting configurado</li>
+                    <li>✓ Security headers en nginx</li>
+                    <li>✓ Variables sensibles en .env</li>
+                    <li>✓ .env en .gitignore</li>
+                    <li>✓ Validación de inputs</li>
+                    <li>✓ Sanitización de outputs</li>
+                    <li>✓ 2FA disponible para usuarios</li>
+                    <li>✓ Logging de eventos de seguridad</li>
+                    <li>✓ Backups automáticos configurados</li>
+                    <li>✓ Plan de respuesta a incidentes</li>
+                </ul>
+
+                <h3 class="subsection-title">Auditoría Regular</h3>
+                
+                <ul class="checklist">
+                    <li>□ Revisar logs de seguridad semanalmente</li>
+                    <li>□ Actualizar dependencias mensualmente</li>
+                    <li>□ Scan de vulnerabilidades trimestral</li>
+                    <li>□ Pruebas de penetración anuales</li>
+                    <li>□ Revisión de permisos de usuarios</li>
+                    <li>□ Rotación de secrets y API keys</li>
+                </ul>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Herramientas Recomendadas:</strong> OWASP ZAP, Burp Suite, Safety (Python), Snyk
+                </div>
+            </div>
+        </div>
+
+        <!-- API Section -->
+        <div id="api-section" class="doc-section" style="display: none;">
+            <h1 class="page-title">API Reference</h1>
+            
+            <div class="breadcrumb-nav">
+                <i class="fas fa-home"></i> / Referencias / API
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Introducción a la API</h2>
+
+                <p>Aula Virtual proporciona una API REST para integraciones externas. Todos los endpoints requieren autenticación por API Key.</p>
+
+                <h3 class="subsection-title">1.1 Base URL</h3>
+                <pre><code>https://aulavirtual.com/api</code></pre>
+
+                <h3 class="subsection-title">1.2 Autenticación</h3>
+                
+                <p>Todas las solicitudes deben incluir el header <code>X-API-Key</code>:</p>
+                
+                <pre><code class="language-bash">curl -H "X-API-Key: tu-api-key-aqui" \
+     https://aulavirtual.com/api/docentes</code></pre>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-key"></i>
+                    <strong>API Key:</strong> Solicita tu API key al administrador. Nunca expongas tu API key públicamente.
+                </div>
+
+                <h3 class="subsection-title">1.3 Rate Limiting</h3>
+                
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Límite</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Requests por segundo</td>
+                                <td>30</td>
+                            </tr>
+                            <tr>
+                                <td>Burst</td>
+                                <td>10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">1.4 Formato de Respuesta</h3>
+                
+                <p>Todas las respuestas son en formato JSON:</p>
+                
+                <pre><code class="language-json">{
+    "data": { ... },
+    "meta": {
+        "total": 100,
+        "page": 1,
+        "per_page": 20
+    },
+    "error": null
+}</code></pre>
+
+                <h3 class="subsection-title">1.5 Códigos de Estado HTTP</h3>
+                
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Significado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">200</span></td>
+                                <td>OK - Solicitud exitosa</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info">201</span></td>
+                                <td>Created - Recurso creado</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">400</span></td>
+                                <td>Bad Request - Datos inválidos</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">401</span></td>
+                                <td>Unauthorized - API key inválida o faltante</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">404</span></td>
+                                <td>Not Found - Recurso no encontrado</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-danger">429</span></td>
+                                <td>Too Many Requests - Rate limit excedido</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-danger">500</span></td>
+                                <td>Internal Server Error - Error del servidor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Endpoints - Docentes</h2>
+
+                <h3 class="subsection-title">2.1 Listar Docentes</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/docentes</code>
+                </div>
+
+                <p>Obtiene una lista paginada de docentes verificados.</p>
+
+                <h4>Parámetros de Query</h4>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Default</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>page</code></td>
+                                <td>integer</td>
+                                <td>Número de página</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td><code>per_page</code></td>
+                                <td>integer</td>
+                                <td>Resultados por página</td>
+                                <td>20</td>
+                            </tr>
+                            <tr>
+                                <td><code>especialidad</code></td>
+                                <td>string</td>
+                                <td>Filtrar por especialidad</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Ejemplo de Solicitud</h4>
+                <pre><code class="language-bash">curl -H "X-API-Key: tu-api-key" \
+     "https://aulavirtual.com/api/docentes?page=1&per_page=10&especialidad=Matematicas"</code></pre>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "docentes": [
+        {
+            "id": 1,
+            "nombre": "Juan Pérez",
+            "email": "juan@example.com",
+            "especialidad": "Matemáticas",
+            "descripcion": "Profesor con 10 años de experiencia...",
+            "precio_hora": 25.00,
+            "calificacion_promedio": 4.8,
+            "total_resenas": 45,
+            "total_clases": 120
+        }
+    ],
+    "total": 50,
+    "page": 1,
+    "per_page": 10,
+    "pages": 5
+}</code></pre>
+
+                <h3 class="subsection-title">2.2 Obtener Docente por ID</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/docentes/{docente_id}</code>
+                </div>
+
+                <p>Obtiene los detalles completos de un docente específico.</p>
+
+                <h4>Ejemplo de Solicitud</h4>
+                <pre><code class="language-bash">curl -H "X-API-Key: tu-api-key" \
+     https://aulavirtual.com/api/docentes/1</code></pre>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "id": 1,
+    "nombre": "Juan Pérez",
+    "email": "juan@example.com",
+    "telefono": "+1234567890",
+    "especialidad": "Matemáticas y Física",
+    "descripcion": "Profesor con 10 años de experiencia...",
+    "experiencia": "Instituto A (2010-2015), Universidad B (2015-presente)",
+    "educacion": "Licenciatura en Matemáticas, Maestría en Física",
+    "precio_hora": 25.00,
+    "calificacion_promedio": 4.8,
+    "total_resenas": 45,
+    "total_clases": 120,
+    "fecha_registro": "2024-01-15T10:30:00Z"
+}</code></pre>
+
+                <h3 class="subsection-title">2.3 Reseñas de un Docente</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/docentes/{docente_id}/resenas</code>
+                </div>
+
+                <p>Obtiene las reseñas de un docente.</p>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "docente_id": 1,
+    "docente_nombre": "Juan Pérez",
+    "total_resenas": 45,
+    "resenas": [
+        {
+            "id": 1,
+            "calificacion": 5,
+            "comentario": "Excelente profesor, muy claro en sus explicaciones",
+            "cliente_nombre": "María García",
+            "fecha": "2024-03-01T14:30:00Z"
+        }
+    ]
+}</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Endpoints - Clases</h2>
+
+                <h3 class="subsection-title">3.1 Listar Clases</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/clases</code>
+                </div>
+
+                <h4>Parámetros de Query</h4>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>page</code></td>
+                                <td>integer</td>
+                                <td>Número de página</td>
+                            </tr>
+                            <tr>
+                                <td><code>per_page</code></td>
+                                <td>integer</td>
+                                <td>Resultados por página</td>
+                            </tr>
+                            <tr>
+                                <td><code>estado</code></td>
+                                <td>string</td>
+                                <td>pendiente | confirmada | completada | cancelada</td>
+                            </tr>
+                            <tr>
+                                <td><code>fecha_desde</code></td>
+                                <td>string</td>
+                                <td>Formato ISO 8601: 2024-03-01T00:00:00Z</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "clases": [
+        {
+            "id": 1,
+            "titulo": "Clase de Cálculo Integral",
+            "fecha_inicio": "2024-03-05T15:00:00Z",
+            "duracion_minutos": 60,
+            "estado": "confirmada",
+            "monto": 25.00,
+            "docente": {
+                "id": 1,
+                "nombre": "Juan Pérez",
+                "especialidad": "Matemáticas"
+            },
+            "cliente": {
+                "id": 10,
+                "nombre": "María García"
+            }
+        }
+    ],
+    "total": 150,
+    "page": 1,
+    "per_page": 20,
+    "pages": 8
+}</code></pre>
+
+                <h3 class="subsection-title">3.2 Obtener Clase por ID</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/clases/{clase_id}</code>
+                </div>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "id": 1,
+    "titulo": "Clase de Cálculo Integral",
+    "descripcion": "Repaso de integrales definidas e indefinidas",
+    "fecha_inicio": "2024-03-05T15:00:00Z",
+    "fecha_fin": "2024-03-05T16:00:00Z",
+    "duracion_minutos": 60,
+    "estado": "confirmada",
+    "estado_pago": true,
+    "monto": 25.00,
+    "link_jitsi": "https://meet.jit.si/clase-abc123",
+    "docente": {
+        "id": 1,
+        "nombre": "Juan Pérez",
+        "email": "juan@example.com"
+    },
+    "cliente": {
+        "id": 10,
+        "nombre": "María García",
+        "email": "maria@example.com"
+    },
+    "fecha_creacion": "2024-03-01T10:00:00Z"
+}</code></pre>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Nota:</strong> El <code>link_jitsi</code> solo se proporciona si <code>estado_pago</code> es <code>true</code>.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Endpoints - Estadísticas</h2>
+
+                <h3 class="subsection-title">4.1 Health Check</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/health</code>
+                </div>
+
+                <p>Verifica el estado de la API. <strong>No requiere autenticación.</strong></p>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "status": "ok",
+    "timestamp": "2024-03-03T12:00:00Z",
+    "version": "1.0.0"
+}</code></pre>
+
+                <h3 class="subsection-title">4.2 Estadísticas de Docente</h3>
+                
+                <div class="endpoint-box">
+                    <span class="badge bg-success">GET</span>
+                    <code>/api/docentes/{docente_id}/estadisticas</code>
+                </div>
+
+                <h4>Ejemplo de Respuesta</h4>
+                <pre><code class="language-json">{
+    "docente_id": 1,
+    "total_clases": 120,
+    "clases_mes_actual": 15,
+    "calificacion_promedio": 4.8,
+    "total_resenas": 45,
+    "ingresos_totales": 3000.00,
+    "ingresos_mes_actual": 375.00,
+    "estudiantes_unicos": 68
+}</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Manejo de Errores</h2>
+
+                <h3 class="subsection-title">5.1 Formato de Error</h3>
+                
+                <p>Cuando ocurre un error, la API responde con el siguiente formato:</p>
+                
+                <pre><code class="language-json">{
+    "error": {
+        "code": "API_KEY_INVALID",
+        "message": "API key inválida o faltante",
+        "details": {
+            "header": "X-API-Key"
+        }
+    },
+    "status": 401
+}</code></pre>
+
+                <h3 class="subsection-title">5.2 Códigos de Error Comunes</h3>
+                
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Solución</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>API_KEY_INVALID</code></td>
+                                <td>API key inválida o faltante</td>
+                                <td>Verifica que el header X-API-Key esté presente y sea correcto</td>
+                            </tr>
+                            <tr>
+                                <td><code>RESOURCE_NOT_FOUND</code></td>
+                                <td>Recurso no encontrado</td>
+                                <td>Verifica que el ID sea correcto</td>
+                            </tr>
+                            <tr>
+                                <td><code>RATE_LIMIT_EXCEEDED</code></td>
+                                <td>Límite de rate excedido</td>
+                                <td>Espera antes de hacer más solicitudes</td>
+                            </tr>
+                            <tr>
+                                <td><code>VALIDATION_ERROR</code></td>
+                                <td>Datos inválidos en la solicitud</td>
+                                <td>Revisa los parámetros enviados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">6. Ejemplos de Integración</h2>
+
+                <h3 class="subsection-title">6.1 Python</h3>
+                
+                <pre><code class="language-python">import requests
+
+API_KEY = "tu-api-key"
+BASE_URL = "https://aulavirtual.com/api"
+
+headers = {
+    "X-API-Key": API_KEY
+}
+
+# Listar docentes
+response = requests.get(f"{BASE_URL}/docentes", headers=headers)
+docentes = response.json()
+
+# Obtener docente específico
+docente_id = 1
+response = requests.get(f"{BASE_URL}/docentes/{docente_id}", headers=headers)
+docente = response.json()
+
+print(f"Docente: {docente['nombre']}")
+print(f"Especialidad: {docente['especialidad']}")
+print(f"Precio/hora: ${docente['precio_hora']}")</code></pre>
+
+                <h3 class="subsection-title">6.2 JavaScript (Node.js)</h3>
+                
+                <pre><code class="language-javascript">const axios = require('axios');
+
+const API_KEY = 'tu-api-key';
+const BASE_URL = 'https://aulavirtual.com/api';
+
+const headers = {
+    'X-API-Key': API_KEY
+};
+
+// Listar docentes
+async function listarDocentes() {
+    try {
+        const response = await axios.get(`${BASE_URL}/docentes`, { headers });
+        console.log(response.data.docentes);
+    } catch (error) {
+        console.error('Error:', error.response.data);
+    }
+}
+
+// Obtener clase por ID
+async function obtenerClase(claseId) {
+    try {
+        const response = await axios.get(`${BASE_URL}/clases/${claseId}`, { headers });
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error.response.data);
+    }
+}
+
+listarDocentes();</code></pre>
+
+                <h3 class="subsection-title">6.3 cURL</h3>
+                
+                <pre><code class="language-bash"># Listar docentes con paginación
+curl -H "X-API-Key: tu-api-key" \
+     "https://aulavirtual.com/api/docentes?page=1&per_page=10"
+
+# Obtener reseñas de un docente
+curl -H "X-API-Key: tu-api-key" \
+     https://aulavirtual.com/api/docentes/1/resenas
+
+# Filtrar clases por estado
+curl -H "X-API-Key: tu-api-key" \
+     "https://aulavirtual.com/api/clases?estado=confirmada&page=1"</code></pre>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">7. Webhooks</h2>
+
+                <h3 class="subsection-title">7.1 Eventos Disponibles</h3>
+                
+                <p>Puedes configurar webhooks para recibir notificaciones en tiempo real de eventos importantes:</p>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Evento</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>clase.creada</code></td>
+                                <td>Se ha creado una nueva clase</td>
+                            </tr>
+                            <tr>
+                                <td><code>clase.confirmada</code></td>
+                                <td>El pago se ha confirmado y la clase está confirmada</td>
+                            </tr>
+                            <tr>
+                                <td><code>clase.completada</code></td>
+                                <td>La clase ha sido completada</td>
+                            </tr>
+                            <tr>
+                                <td><code>clase.cancelada</code></td>
+                                <td>La clase ha sido cancelada</td>
+                            </tr>
+                            <tr>
+                                <td><code>pago.exitoso</code></td>
+                                <td>Un pago se ha procesado exitosamente</td>
+                            </tr>
+                            <tr>
+                                <td><code>docente.verificado</code></td>
+                                <td>Un docente ha sido verificado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="subsection-title">7.2 Formato del Payload</h3>
+                
+                <pre><code class="language-json">{
+    "event": "clase.confirmada",
+    "timestamp": "2024-03-03T15:30:00Z",
+    "data": {
+        "clase_id": 1,
+        "docente_id": 1,
+        "cliente_id": 10,
+        "monto": 25.00,
+        "fecha_inicio": "2024-03-05T15:00:00Z"
+    }
+}</code></pre>
+
+                <div class="alert alert-custom alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Configuración:</strong> Contacta al administrador para configurar webhooks para tu aplicación.
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">8. Límites y Mejores Prácticas</h2>
+
+                <h3 class="subsection-title">8.1 Límites</h3>
+                
+                <ul>
+                    <li><strong>Rate Limit:</strong> 30 requests/segundo, burst de 10</li>
+                    <li><strong>Paginación:</strong> Máximo 100 resultados por página</li>
+                    <li><strong>Timeout:</strong> 30 segundos por request</li>
+                </ul>
+
+                <h3 class="subsection-title">8.2 Mejores Prácticas</h3>
+                
+                <ul class="checklist">
+                    <li>✓ Implementa retry logic con exponential backoff</li>
+                    <li>✓ Cachea respuestas cuando sea apropiado</li>
+                    <li>✓ Usa paginación para grandes conjuntos de datos</li>
+                    <li>✓ Maneja errores gracefully</li>
+                    <li>✓ Monitorea el uso de tu API key</li>
+                    <li>✓ No expongas tu API key en el frontend</li>
+                    <li>✓ Usa HTTPS siempre</li>
+                    <li>✓ Valida responses antes de procesarlas</li>
+                </ul>
+
+                <h3 class="subsection-title">8.3 Versionado</h3>
+                
+                <p>La API está actualmente en versión 1.0. Cambios breaking se comunicarán con al menos 3 meses de anticipación.</p>
+
+                <div class="alert alert-custom alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Soporte:</strong> Para reportar bugs o solicitar funcionalidades, contacta a soporte@aulavirtual.com
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div id="faq-section" class="doc-section" style="display: none;">
+            <h1 class="page-title">Preguntas Frecuentes (FAQ)</h1>
+            
+            <div class="breadcrumb-nav">
+                <i class="fas fa-home"></i> / Ayuda / FAQ
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">1. Preguntas Generales</h2>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question-circle"></i> ¿Qué es Aula Virtual?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Aula Virtual es una plataforma educativa que conecta estudiantes con docentes calificados para clases personalizadas en línea. Ofrecemos una amplia variedad de materias y horarios flexibles adaptados a tus necesidades.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question-circle"></i> ¿Cómo funciona la plataforma?
+                    </h3>
+                    <div class="faq-answer">
+                        <ol>
+                            <li>Crea una cuenta gratuita</li>
+                            <li>Busca docentes según tu materia de interés</li>
+                            <li>Solicita una clase en el horario que prefieras</li>
+                            <li>Realiza el pago de forma segura con Stripe</li>
+                            <li>Únete a la clase mediante videoconferencia (Jitsi Meet)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question-circle"></i> ¿Es gratis usar Aula Virtual?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Crear una cuenta y buscar docentes es completamente gratis. Solo pagas por las clases que solicites al precio fijado por cada docente (típicamente $15-50 USD por hora).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question-circle"></i> ¿Qué necesito para tomar clases?
+                    </h3>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>Conexión a internet estable</li>
+                            <li>Computadora, tablet o smartphone</li>
+                            <li>Navegador web moderno (Chrome, Firefox, Safari, Edge)</li>
+                            <li>Cámara y micrófono (recomendado)</li>
+                            <li>Auriculares (opcional, pero mejora la calidad del audio)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question-circle"></i> ¿En qué idiomas está disponible la plataforma?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Actualmente Aula Virtual está disponible en español. Las clases pueden impartirse en diferentes idiomas según la preferencia del docente y estudiante.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">2. Para Estudiantes</h2>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-user-graduate"></i> ¿Cómo creo una cuenta?
+                    </h3>
+                    <div class="faq-answer">
+                        <ol>
+                            <li>Haz clic en "Registrarse" en la página principal</li>
+                            <li>Completa el formulario con tu nombre, email y contraseña</li>
+                            <li>Verifica tu email (revisa la bandeja de spam si no lo recibes)</li>
+                            <li>Configura la autenticación de dos factores (2FA) para mayor seguridad</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-search"></i> ¿Cómo busco un docente?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Desde tu dashboard, ve a "Buscar Docentes" y filtra por:</p>
+                        <ul>
+                            <li><strong>Especialidad:</strong> Matemáticas, Física, Inglés, Programación, etc.</li>
+                            <li><strong>Precio:</strong> Define tu rango de presupuesto</li>
+                            <li><strong>Calificación:</strong> Revisa reseñas de otros estudiantes</li>
+                        </ul>
+                        <p>Cada perfil muestra experiencia, educación, precios y reseñas.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-calendar-plus"></i> ¿Cómo reservo una clase?
+                    </h3>
+                    <div class="faq-answer">
+                        <ol>
+                            <li>Selecciona el docente que deseas</li>
+                            <li>Haz clic en "Solicitar Clase"</li>
+                            <li>Completa el formulario:
+                                <ul>
+                                    <li>Título de la clase</li>
+                                    <li>Descripción (temas a cubrir)</li>
+                                    <li>Fecha y hora</li>
+                                    <li>Duración (mínimo 30 minutos)</li>
+                                </ul>
+                            </li>
+                            <li>Procede con el pago</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-credit-card"></i> ¿Cómo pago las clases?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Aceptamos pagos a través de <strong>Stripe</strong>, que procesa de forma segura:</p>
+                        <ul>
+                            <li>Tarjetas de crédito (Visa, Mastercard, American Express)</li>
+                            <li>Tarjetas de débito</li>
+                        </ul>
+                        <p>Tu información financiera <strong>nunca</strong> se almacena en nuestros servidores.</p>
+                        
+                        <div class="alert alert-custom alert-success">
+                            <i class="fas fa-lock"></i>
+                            <strong>Seguro:</strong> Todas las transacciones están encriptadas con SSL/TLS.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-video"></i> ¿Cómo me conecto a una clase?
+                    </h3>
+                    <div class="faq-answer">
+                        <ol>
+                            <li>Una vez confirmado el pago, recibirás un email de confirmación</li>
+                            <li>En "Mis Clases" verás el link de la videoconferencia (Jitsi Meet)</li>
+                            <li>5 minutos antes de la clase, haz clic en el link</li>
+                            <li>Autoriza el uso de cámara y micrófono en tu navegador</li>
+                            <li>¡Listo! Ya estás en la clase</li>
+                        </ol>
+                        
+                        <div class="alert alert-custom alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> No necesitas descargar ningún software. Jitsi funciona directamente en tu navegador.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-times-circle"></i> ¿Puedo cancelar una clase?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Sí, puedes cancelar desde "Mis Clases". Las políticas de reembolso son:</p>
+                        <div class="table-responsive">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Cancelación</th>
+                                        <th>Reembolso</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Más de 24 horas antes</td>
+                                        <td><span class="badge bg-success">100%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>12-24 horas antes</td>
+                                        <td><span class="badge bg-warning">50%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Menos de 12 horas antes</td>
+                                        <td><span class="badge bg-danger">0%</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-star"></i> ¿Cómo dejo una reseña?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Después de completar una clase:</p>
+                        <ol>
+                            <li>Ve a "Mis Clases"</li>
+                            <li>Selecciona la clase completada</li>
+                            <li>Haz clic en "Dejar Reseña"</li>
+                            <li>Califica de 1 a 5 estrellas</li>
+                            <li>Escribe un comentario (opcional)</li>
+                        </ol>
+                        <p>Las reseñas ayudan a otros estudiantes a elegir docentes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">3. Para Docentes</h2>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-chalkboard-teacher"></i> ¿Cómo me registro como docente?
+                    </h3>
+                    <div class="faq-answer">
+                        <ol>
+                            <li>Crea una cuenta normal</li>
+                            <li>Ve a "Mi Perfil" → "Completar Perfil de Docente"</li>
+                            <li>Completa el formulario con:
+                                <ul>
+                                    <li>Especialidad</li>
+                                    <li>Descripción profesional</li>
+                                    <li>Experiencia laboral</li>
+                                    <li>Educación y certificaciones</li>
+                                    <li>Precio por hora</li>
+                                </ul>
+                            </li>
+                            <li>Envía tu solicitud para revisión</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-check-circle"></i> ¿Cuánto tarda la verificación?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>El equipo de administración revisa cada solicitud en 24-48 horas. Verificamos:</p>
+                        <ul>
+                            <li>Credenciales educativas</li>
+                            <li>Experiencia profesional</li>
+                            <li>Calidad del perfil</li>
+                        </ul>
+                        <p>Recibirás un email cuando tu perfil sea aprobado.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-bell"></i> ¿Cómo recibo solicitudes de clases?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Cuando un estudiante solicite una clase:</p>
+                        <ol>
+                            <li>Recibirás un <strong>email de notificación</strong></li>
+                            <li>La clase aparecerá en tu dashboard como "Pendiente"</li>
+                            <li>Una vez que el estudiante complete el pago, el estado cambiará a "Confirmada"</li>
+                            <li>Recibirás el link de Jitsi para la clase</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-money-bill-wave"></i> ¿Cómo recibo mis pagos?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Los pagos se procesan automáticamente:</p>
+                        <ul>
+                            <li><strong>Comisión de la plataforma:</strong> 15%</li>
+                            <li><strong>Ganancias del docente:</strong> 85%</li>
+                        </ul>
+                        <p>Los pagos se transfieren a tu cuenta bancaria cada lunes por las clases completadas la semana anterior.</p>
+                        
+                        <div class="alert alert-custom alert-success">
+                            <i class="fas fa-calculator"></i>
+                            <strong>Ejemplo:</strong> Por una clase de $30 USD, recibirás $25.50 USD.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-calendar-check"></i> ¿Puedo gestionar mi disponibilidad?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Actualmente, los estudiantes proponen horarios y tú decides si aceptar o no. Próximamente agregaremos un calendario de disponibilidad donde podrás:</p>
+                        <ul>
+                            <li>Definir horarios disponibles</li>
+                            <li>Bloquear fechas específicas</li>
+                            <li>Configurar duraciones de clase preferidas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-chart-line"></i> ¿Cómo mejoro mi perfil?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Para atraer más estudiantes:</p>
+                        <ul class="checklist">
+                            <li>✓ <strong>Completa tu perfil al 100%</strong> con descripción detallada</li>
+                            <li>✓ <strong>Sube una foto profesional</strong></li>
+                            <li>✓ <strong>Detalla tu experiencia</strong> y certificaciones</li>
+                            <li>✓ <strong>Ofrece precios competitivos</strong> (promedio: $25/hora)</li>
+                            <li>✓ <strong>Sé puntual</strong> y profesional en las clases</li>
+                            <li>✓ <strong>Pide a tus estudiantes que dejen reseñas</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">4. Aspectos Técnicos</h2>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-code"></i> ¿Qué tecnologías usa Aula Virtual?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Nuestra plataforma está construida con tecnologías modernas y seguras:</p>
+                        
+                        <div class="table-responsive">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Componente</th>
+                                        <th>Tecnología</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Backend</td>
+                                        <td>Python + Flask</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Base de datos</td>
+                                        <td>PostgreSQL</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pagos</td>
+                                        <td>Stripe</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Videoconferencia</td>
+                                        <td>Jitsi Meet</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Autenticación</td>
+                                        <td>Flask-Login + 2FA (TOTP)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tareas asíncronas</td>
+                                        <td>Celery + Redis</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-shield-alt"></i> ¿Es segura la plataforma?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Sí, implementamos múltiples capas de seguridad:</p>
+                        <ul>
+                            <li><strong>HTTPS/SSL:</strong> Todas las conexiones están encriptadas</li>
+                            <li><strong>2FA:</strong> Autenticación de dos factores obligatoria</li>
+                            <li><strong>Hashing de contraseñas:</strong> PBKDF2 con salt</li>
+                            <li><strong>Protecciones:</strong> SQL Injection, XSS, CSRF</li>
+                            <li><strong>Rate limiting:</strong> Prevención de ataques por fuerza bruta</li>
+                            <li><strong>Backups:</strong> Diarios y encriptados</li>
+                        </ul>
+                        <p>Ver sección <a href="#" onclick="showSection('seguridad-section'); return false;">Seguridad</a> para más detalles.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-mobile-alt"></i> ¿Hay una app móvil?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Actualmente Aula Virtual es una aplicación web 100% responsive que funciona perfectamente en cualquier dispositivo móvil a través del navegador. Estamos evaluando desarrollar aplicaciones nativas para iOS y Android en el futuro.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-plug"></i> ¿Hay una API disponible?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Sí, ofrecemos una API REST para integraciones. Ver la sección <a href="#" onclick="showSection('api-section'); return false;">API Reference</a> para documentación completa.</p>
+                        
+                        <p>Endpoints principales:</p>
+                        <ul>
+                            <li><code>GET /api/docentes</code> - Listar docentes</li>
+                            <li><code>GET /api/docentes/{id}</code> - Detalles de docente</li>
+                            <li><code>GET /api/clases</code> - Listar clases</li>
+                            <li><code>GET /api/clases/{id}</code> - Detalles de clase</li>
+                        </ul>
+                        
+                        <div class="alert alert-custom alert-info">
+                            <i class="fas fa-key"></i>
+                            <strong>API Key:</strong> Solicita tu API key a soporte@aulavirtual.com
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-bug"></i> Problemas técnicos comunes
+                    </h3>
+                    <div class="faq-answer">
+                        <div class="table-responsive">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Problema</th>
+                                        <th>Solución</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>No puedo conectarme a la videollamada</td>
+                                        <td>Verifica que tu navegador tenga permisos para cámara y micrófono. Recarga la página.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>No recibí el email de confirmación</td>
+                                        <td>Revisa tu carpeta de spam. Desde tu perfil, solicita reenvío del email.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Error al procesar el pago</td>
+                                        <td>Verifica los datos de tu tarjeta. Contacta a tu banco si el problema persiste.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>No puedo cambiar mi contraseña</td>
+                                        <td>Usa la opción "Olvidé mi contraseña" en el login.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>El 2FA no funciona</td>
+                                        <td>Verifica que la hora de tu dispositivo esté sincronizada. Usa los códigos de respaldo si es necesario.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h2 class="section-title">5. Políticas y Soporte</h2>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-file-contract"></i> ¿Dónde encuentro los términos de servicio?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Revisa nuestras políticas en:</p>
+                        <ul>
+                            <li><a href="/terminos">Términos y Condiciones</a></li>
+                            <li><a href="/privacidad">Política de Privacidad</a></li>
+                            <li><a href="/como-funciona">Cómo Funciona</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-headset"></i> ¿Cómo contacto a soporte?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Estamos aquí para ayudarte:</p>
+                        <ul>
+                            <li><strong>Email:</strong> soporte@aulavirtual.com</li>
+                            <li><strong>Horario:</strong> Lunes a Viernes, 9:00 - 18:00 (GMT-5)</li>
+                            <li><strong>Tiempo de respuesta:</strong> Máximo 24 horas</li>
+                        </ul>
+                        <p>También puedes usar el formulario de <a href="/contacto">Contacto</a>.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-flag"></i> ¿Cómo reporto un problema?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Si encuentras un comportamiento inadecuado, un bug técnico o tienes una sugerencia:</p>
+                        <ol>
+                            <li>Envía un email detallado a soporte@aulavirtual.com</li>
+                            <li>Incluye capturas de pantalla si es posible</li>
+                            <li>Describe los pasos para reproducir el problema</li>
+                        </ol>
+                        <p>Agradecemos tu feedback para mejorar la plataforma.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-user-shield"></i> ¿Cómo protegen mis datos personales?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Cumplimos con las mejores prácticas de protección de datos:</p>
+                        <ul>
+                            <li>No compartimos tu información con terceros sin consentimiento</li>
+                            <li>Encriptamos datos sensibles</li>
+                            <li>Realizamos backups seguros</li>
+                            <li>Puedes solicitar eliminar tu cuenta en cualquier momento</li>
+                        </ul>
+                        <p>Lee nuestra <a href="/privacidad">Política de Privacidad</a> completa.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">
+                        <i class="fas fa-question"></i> ¿No encuentras tu pregunta?
+                    </h3>
+                    <div class="faq-answer">
+                        <p>Si tu pregunta no está en este FAQ, no dudes en contactarnos:</p>
+                        
+                        <div class="alert alert-custom alert-success">
+                            <i class="fas fa-envelope"></i>
+                            <strong>Email:</strong> <a href="mailto:soporte@aulavirtual.com">soporte@aulavirtual.com</a>
+                        </div>
+                        
+                        <p>También puedes explorar la documentación completa en las secciones de <a href="#" onclick="showSection('usuario-section'); return false;">Usuario</a> y <a href="#" onclick="showSection('docente-section'); return false;">Docente</a>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <h2 class="section-title" style="color: white;">¿Listo para empezar?</h2>
+                <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Únete a miles de estudiantes y docentes que ya están usando Aula Virtual.</p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="/register" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Registrarse Gratis
+                    </a>
+                    <a href="/docentes" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-search"></i> Explorar Docentes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+
+    <script>
+        // Inicializar highlight.js
+        hljs.highlightAll();
+
+        // Variables globales
+        let sidebarCollapsed = false;
+
+        // Función para mostrar sección
+        function showSection(sectionName) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.doc-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Mostrar sección seleccionada
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Actualizar nav links activos
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            const activeLink = document.querySelector(`.sidebar .nav-link[data-section="${sectionName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // Event listeners para sidebar
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = this.getAttribute('data-section');
+                showSection(section);
+            });
+        });
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = document.getElementById('toggleSidebar');
+
+            sidebarCollapsed = !sidebarCollapsed;
+
+            if (sidebarCollapsed) {
+                sidebar.classList.add('sidebar-hidden');
+                mainContent.classList.add('expanded');
+                toggleBtn.classList.add('collapsed');
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            } else {
+                sidebar.classList.remove('sidebar-hidden');
+                mainContent.classList.remove('expanded');
+                toggleBtn.classList.remove('collapsed');
+                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+            }
+        }
+
+        // Búsqueda en documentación
+        document.getElementById('searchDocs').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            // Aquí puedes implementar la lógica de búsqueda
+            console.log('Buscando:', searchTerm);
+        });
+
+        // Responsive: cerrar sidebar en móvil al seleccionar
+        if (window.innerWidth <= 992) {
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    document.getElementById('sidebar').classList.remove('show');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

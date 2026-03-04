@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i>Panel de Administración</h1>
+    
+    <!-- Estadísticas Principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Usuarios</h6>
+                            <h2 class="mt-2">{{ total_usuarios }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Docentes Activos</h6>
+                            <h2 class="mt-2">{{ total_docentes }}</h2>
+                        </div>
+                        <i class="fas fa-chalkboard-teacher fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Ingresos del Mes</h6>
+                            <h2 class="mt-2">${{ "%.2f"|format(ingresos_mes) }}</h2>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Clases del Mes</h6>
+                            <h2 class="mt-2">{{ clases_mes }}</h2>
+                        </div>
+                        <i class="fas fa-book-open fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alertas -->
+    {% if docentes_pendientes > 0 %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Hay <strong>{{ docentes_pendientes }}</strong> docente(s) pendiente(s) de verificación.
+        <a href="{{ url_for('admin.docentes', verificado='no') }}" class="alert-link">Ver docentes pendientes</a>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- Gráfica de Ingresos -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Ingresos Últimos 6 Meses</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ingresosChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Docentes -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-trophy me-2"></i>Top Docentes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for docente in top_docentes %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <strong>{{ docente.usuario.nombre }}</strong><br>
+                                <small class="text-muted">{{ docente.especialidad }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i> {{ "%.1f"|format(docente.promedio_calificacion) }}
+                                </div>
+                                <small class="text-muted">{{ docente.total_clases }} clases</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Usuarios Recientes -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5><i class="fas fa-user-plus me-2"></i>Usuarios Recientes</h5>
+                    <a href="{{ url_for('admin.usuarios') }}" class="btn btn-sm btn-primary">Ver Todos</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios_recientes %}
+                                <tr>
+                                    <td>{{ usuario.nombre }}</td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td><span class="badge bg-primary">{{ usuario.rol }}</span></td>
+                                    <td>{{ usuario.fecha_registro.strftime('%d/%m') if usuario.fecha_registro }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Clases Recientes -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5><i class="fas fa-book me-2"></i>Clases Recientes</h5>
+                    <a href="{{ url_for('admin.clases') }}" class="btn btn-sm btn-primary">Ver Todas</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Docente</th>
+                                    <th>Estudiante</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for clase in clases_recientes %}
+                                <tr>
+                                    <td>{{ clase.titulo }}</td>
+                                    <td>{{ clase.docente_rel.usuario.nombre }}</td>
+                                    <td>{{ clase.cliente.nombre }}</td>
+                                    <td>${{ "%.2f"|format(clase.monto) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Accesos Rápidos -->
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-3">Accesos Rápidos</h4>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.usuarios') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-primary mb-2"></i>
+                    <h6>Gestionar Usuarios</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.docentes') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-success mb-2"></i>
+                    <h6>Gestionar Docentes</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.pagos') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-3x text-warning mb-2"></i>
+                    <h6>Ver Pagos</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.reportes') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-3x text-info mb-2"></i>
+                    <h6>Reportes</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Gráfica de ingresos
+const ctx = document.getElementById('ingresosChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ meses_labels|tojson }},
+        datasets: [{
+            label: 'Ingresos ($)',
+            data: {{ meses_valores|tojson }},
+            borderColor: 'rgb(102, 126, 234)',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '$' + value.toFixed(2);
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+
+<style>
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    transition: all 0.3s;
+}
+.opacity-50 {
+    opacity: 0.5;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ docente.usuario.nombre }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if docente.usuario.avatar_url %}
+                    <img src="{{ docente.usuario.avatar_url }}" class="rounded-circle mb-3" 
+                         width="150" height="150" alt="{{ docente.usuario.nombre }}">
+                    {% else %}
+                    <i class="fas fa-user-circle fa-10x text-muted mb-3"></i>
+                    {% endif %}
+                    
+                    <h3>{{ docente.usuario.nombre }}</h3>
+                    <p class="text-muted">{{ docente.especialidad }}</p>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-warning mb-0">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(docente.promedio_calificacion) }}
+                        </h4>
+                        <small class="text-muted">{{ docente.total_resenas }} reseñas</small>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <h4 class="mb-0">${{ "%.2f"|format(docente.precio_hora) }}</h4>
+                        <small>por hora</small>
+                    </div>
+                    
+                    {% if current_user.is_authenticated and current_user.rol == 'cliente' %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.reservar_clase', docente_id=docente.id) }}" 
+                           class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-plus me-2"></i>Reservar Clase
+                        </a>
+                    </div>
+                    {% elif not current_user.is_authenticated %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
+                            Inicia sesión para reservar
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
+                    <hr>
+                    <p><i class="fas fa-graduation-cap me-2 text-primary"></i> {{ docente.total_clases }} clases impartidas</p>
+                    {% if docente.usuario.fecha_registro %}
+                    <p><i class="fas fa-calendar me-2 text-primary"></i> Miembro desde {{ docente.usuario.fecha_registro.strftime('%B %Y') }}</p>
+                    {% endif %}
+                    {% if docente.verificado %}
+                    <p><i class="fas fa-check-circle me-2 text-success"></i> Perfil Verificado</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Descripción -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4><i class="fas fa-user me-2"></i>Sobre mí</h4>
+                    <hr>
+                    {% if docente.descripcion %}
+                    <p>{{ docente.descripcion }}</p>
+                    {% else %}
+                    <p class="text-muted">Este docente aún no ha agregado una descripción.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Experiencia -->
+            {% if docente.experiencia %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4><i class="fas fa-briefcase me-2"></i>Experiencia</h4>
+                    <hr>
+                    <p>{{ docente.experiencia }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Educación -->
+            {% if docente.educacion %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4><i class="fas fa-university me-2"></i>Educación</h4>
+                    <hr>
+                    <p>{{ docente.educacion }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Materiales Públicos -->
+            {% if materiales %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-folder-open me-2"></i>Materiales Disponibles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for material in materiales %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-file-{{ material.tipo }} me-2"></i>{{ material.titulo }}
+                                </h6>
+                                <small>{{ (material.tamanio_kb / 1024)|round(2) }} MB</small>
+                            </div>
+                            {% if material.descripcion %}
+                            <p class="mb-1 small">{{ material.descripcion }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Reseñas -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-comments me-2"></i>Reseñas ({{ resenas|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if resenas %}
+                    {% for resena in resenas %}
+                    <div class="mb-3 pb-3 {{ 'border-bottom' if not loop.last }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ resena.cliente.nombre }}</h6>
+                                <div class="mb-2">
+                                    {% for i in range(5) %}
+                                        {% if i < resena.calificacion %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ resena.fecha.strftime('%d/%m/%Y') }}</small>
+                        </div>
+                        {% if resena.comentario %}
+                        <p class="mb-0">{{ resena.comentario }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">Este docente aún no tiene reseñas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

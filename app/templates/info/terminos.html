@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Términos y Condiciones - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <h1 class="display-4 fw-bold text-center mb-4">Términos y Condiciones de Uso</h1>
+            <p class="text-center text-muted mb-5">Última actualización: Enero 2024</p>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-5">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Al utilizar Aula Virtual, aceptas estos términos y condiciones. Por favor, léelos cuidadosamente.
+                    </div>
+
+                    <h3 class="mt-4 mb-3">1. Aceptación de Términos</h3>
+                    <p>Al acceder y utilizar la plataforma Aula Virtual ("la Plataforma"), usted acepta estar legalmente vinculado por estos Términos y Condiciones de Uso ("Términos"). Si no está de acuerdo con estos términos, no utilice la Plataforma.</p>
+
+                    <h3 class="mt-4 mb-3">2. Descripción del Servicio</h3>
+                    <p>Aula Virtual es una plataforma en línea que conecta estudiantes con docentes para clases particulares virtuales. La Plataforma facilita:</p>
+                    <ul>
+                        <li>Búsqueda y selección de docentes por especialidad</li>
+                        <li>Programación de clases en línea</li>
+                        <li>Procesamiento de pagos seguros</li>
+                        <li>Videollamadas para impartir clases</li>
+                        <li>Sistema de calificaciones y reseñas</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">3. Requisitos de Registro</h3>
+                    <p>Para utilizar la Plataforma, debes:</p>
+                    <ul>
+                        <li>Tener al menos 18 años de edad (o 16 años con consentimiento parental)</li>
+                        <li>Proporcionar información veraz y actualizada</li>
+                        <li>Mantener la confidencialidad de tu contraseña</li>
+                        <li>Notificar inmediatamente cualquier uso no autorizado de tu cuenta</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">4. Obligaciones de los Estudiantes</h3>
+                    <p>Como estudiante, te comprometes a:</p>
+                    <ul>
+                        <li>Asistir puntualmente a las clases reservadas</li>
+                        <li>Realizar los pagos de manera oportuna</li>
+                        <li>Respetar las políticas de cancelación</li>
+                        <li>Mantener un comportamiento respetuoso con los docentes</li>
+                        <li>No grabar las clases sin consentimiento expreso del docente</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">5. Obligaciones de los Docentes</h3>
+                    <p>Como docente registrado, te comprometes a:</p>
+                    <ul>
+                        <li>Proporcionar credenciales y certificaciones válidas</li>
+                        <li>Impartir clases de calidad profesional</li>
+                        <li>Mantener la puntualidad en las sesiones programadas</li>
+                        <li>Respetar la confidencialidad de la información del estudiante</li>
+                        <li>Cumplir con las leyes fiscales aplicables en tu jurisdicción</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">6. Pagos y Reembolsos</h3>
+                    <h5>6.1 Procesamiento de Pagos</h5>
+                    <p>Todos los pagos se procesan de forma segura a través de Stripe. Aula Virtual no almacena información de tarjetas de crédito.</p>
+                    
+                    <h5>6.2 Comisión de la Plataforma</h5>
+                    <p>Aula Virtual retiene el 15% de cada transacción como comisión por el uso de la plataforma. Los docentes reciben el 85% del monto pagado por el estudiante.</p>
+                    
+                    <h5>6.3 Política de Reembolsos</h5>
+                    <ul>
+                        <li><strong>Más de 24 horas antes:</strong> Reembolso del 100%</li>
+                        <li><strong>Entre 12-24 horas antes:</strong> Reembolso del 50%</li>
+                        <li><strong>Menos de 12 horas antes:</strong> Sin reembolso</li>
+                        <li><strong>Inasistencia del docente:</strong> Reembolso del 100% + crédito adicional</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">7. Propiedad Intelectual</h3>
+                    <p>Todo el contenido de la Plataforma (diseño, logotipos, textos, gráficos, código) es propiedad de Aula Virtual y está protegido por leyes de propiedad intelectual. Los materiales educativos compartidos por los docentes permanecen como su propiedad.</p>
+
+                    <h3 class="mt-4 mb-3">8. Contenido del Usuario</h3>
+                    <p>Los usuarios son responsables del contenido que publican en la Plataforma (reseñas, mensajes, materiales). Nos reservamos el derecho de eliminar contenido que viole estos términos o sea inapropiado.</p>
+
+                    <h3 class="mt-4 mb-3">9. Prohibiciones</h3>
+                    <p>Está estrictamente prohibido:</p>
+                    <ul>
+                        <li>Realizar transacciones fuera de la plataforma para evadir comisiones</li>
+                        <li>Compartir información de contacto para realizar clases externas</li>
+                        <li>Publicar contenido ofensivo, discriminatorio o ilegal</li>
+                        <li>Intentar acceder de forma no autorizada a sistemas de la Plataforma</li>
+                        <li>Usar bots o scripts automatizados</li>
+                        <li>Crear cuentas falsas o múltiples cuentas para abusar del sistema</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">10. Suspensión y Terminación</h3>
+                    <p>Nos reservamos el derecho de suspender o terminar cuentas que violen estos términos sin previo aviso. En caso de terminación, los fondos pendientes serán procesados según corresponda.</p>
+
+                    <h3 class="mt-4 mb-3">11. Limitación de Responsabilidad</h3>
+                    <p>Aula Virtual actúa como intermediario. No somos responsables de:</p>
+                    <ul>
+                        <li>La calidad de las clases impartidas</li>
+                        <li>Disputas entre estudiantes y docentes</li>
+                        <li>Problemas técnicos fuera de nuestro control (internet, hardware)</li>
+                        <li>Pérdidas o daños indirectos</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">12. Modificaciones a los Términos</h3>
+                    <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación. El uso continuo de la Plataforma constituye la aceptación de los nuevos términos.</p>
+
+                    <h3 class="mt-4 mb-3">13. Ley Aplicable</h3>
+                    <p>Estos términos se regirán e interpretarán de conformidad con las leyes de [Jurisdicción]. Cualquier disputa se resolverá en los tribunales de [Ciudad/País].</p>
+
+                    <h3 class="mt-4 mb-3">14. Contacto</h3>
+                    <p>Para preguntas sobre estos términos, contáctanos en:</p>
+                    <p>
+                        Email: legal@aulavirtual.com<br>
+                        Teléfono: +1 (555) 123-4567
+                    </p>
+
+                    <div class="alert alert-warning mt-5">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Al continuar usando Aula Virtual, confirmas que has leído, comprendido y aceptado estos Términos y Condiciones.
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('main.privacidad') }}" class="btn btn-outline-primary me-2">Ver Política de Privacidad</a>
+                        <a href="{{ url_for('main.contacto') }}" class="btn btn-outline-secondary">Contactar Soporte Legal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

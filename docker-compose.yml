@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: aulavirtual_web
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:AulaVirtual2026!@db:5432/aulavirtual_db
+      - SECRET_KEY=${SECRET_KEY:-tu_clave_secreta_super_segura_cambiar_en_produccion}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-true}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=production
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app:/app/app
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - aulavirtual_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: aulavirtual_db
+    environment:
+      POSTGRES_DB: aulavirtual_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: AulaVirtual2026!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - aulavirtual_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aulavirtual_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - aulavirtual_network
+    command: redis-server --appendonly yes
+
+  celery_worker:
+    build: .
+    container_name: aulavirtual_celery
+    command: celery -A app.celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://postgres:AulaVirtual2026!@db:5432/aulavirtual_db
+      - REDIS_URL=redis://redis:6379/0
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-true}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+    networks:
+      - aulavirtual_network
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: aulavirtual_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./static:/usr/share/nginx/html/static:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+    networks:
+      - aulavirtual_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  aulavirtual_network:
+    driver: bridge

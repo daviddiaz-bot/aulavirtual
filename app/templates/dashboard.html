@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Encabezado de Bienvenida -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-banner p-4 bg-gradient-primary text-white rounded">
+                <h2 class="mb-2">👋 ¡Hola, {{ current_user.nombre }}!</h2>
+                <p class="mb-0">Bienvenido a tu panel de {{ 'Administración' if current_user.rol == 'admin' else ('Docente' if current_user.rol == 'docente' else 'Estudiante') }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.rol == 'admin' %}
+        <!-- Dashboard de Administrador -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h3>1,250</h3>
+                    <p>Usuarios Totales</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-success mb-3"></i>
+                    <h3>89</h3>
+                    <p>Docentes Activos</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-book fa-3x text-info mb-3"></i>
+                    <h3>3,456</h3>
+                    <p>Clases Completadas</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign fa-3x text-warning mb-3"></i>
+                    <h3>$45,320</h3>
+                    <p>Ingresos del Mes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Actividad Reciente</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Panel de administración en construcción...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-star"></i> Top Docentes</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Lista de docentes destacados...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif current_user.rol == 'docente' %}
+        <!-- Dashboard de Docente -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                    <h3>12</h3>
+                    <p>Clases Este Mes</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign fa-3x text-success mb-3"></i>
+                    <h3>$850</h3>
+                    <p>Ganancias del Mes</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h3>4.8</h3>
+                    <p>Calificación Promedio</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                    <h3>25</h3>
+                    <p>Estudiantes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar"></i> Próximas Clases</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-plus"></i>
+                            <h5>No tienes clases programadas</h5>
+                            <p>Las clases que agendes aparecerán aquí</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-cog"></i> Acciones Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.perfil') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-edit"></i> Editar Perfil
+                            </a>
+                            <a href="{{ url_for('main.calendario') }}" class="btn btn-outline-success">
+                                <i class="fas fa-calendar-alt"></i> Mi Calendario
+                            </a>
+                            <a href="{{ url_for('main.finanzas') }}" class="btn btn-outline-warning">
+                                <i class="fas fa-wallet"></i> Finanzas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Dashboard de Estudiante -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-book-open fa-3x text-primary mb-3"></i>
+                    <h3>8</h3>
+                    <p>Clases Completadas</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-clock fa-3x text-success mb-3"></i>
+                    <h3>3</h3>
+                    <p>Clases Próximas</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-info mb-3"></i>
+                    <h3>5</h3>
+                    <p>Docentes Favoritos</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-graduation-cap fa-3x text-warning mb-3"></i>
+                    <h3>12h</h3>
+                    <p>Horas de Estudio</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar"></i> Mis Próximas Clases</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h5>No tienes clases programadas</h5>
+                            <p>Busca un docente y agenda tu primera clase</p>
+                            <a href="{{ url_for('main.buscar_docentes') }}" class="btn btn-primary mt-3">
+                                <i class="fas fa-search"></i> Buscar Docentes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-star"></i> Docentes Recomendados</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Docentes destacados basados en tus intereses...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Acciones Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.buscar_docentes') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-search"></i> Buscar Docentes
+                            </a>
+                            <a href="{{ url_for('main.mis_clases') }}" class="btn btn-outline-success">
+                                <i class="fas fa-history"></i> Historial
+                            </a>
+                            <a href="{{ url_for('main.perfil') }}" class="btn btn-outline-info">
+                                <i class="fas fa-user-circle"></i> Mi Perfil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="fas fa-bell"></i> Notificaciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i><br>
+                            No tienes notificaciones nuevas
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+</style>
+{% endblock %}

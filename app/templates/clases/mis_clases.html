@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Clases - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-book me-2"></i>Mis Clases</h1>
+        {% if current_user.rol == 'cliente' %}
+        <a href="{{ url_for('main.docentes') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Reservar Nueva Clase
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <select name="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="completada">Completada</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="fecha_desde" class="form-control" placeholder="Fecha desde">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="fecha_hasta" class="form-control" placeholder="Fecha hasta">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lista de Clases -->
+    {% if clases.items %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>{% if current_user.rol == 'cliente' %}Docente{% else %}Estudiante{% endif %}</th>
+                            <th>Título</th>
+                            <th>Duración</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for clase in clases.items %}
+                        <tr>
+                            <td>{{ clase.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if current_user.rol == 'cliente' %}
+                                {{ clase.docente_rel.usuario.nombre }}
+                                {% else %}
+                                {{ clase.cliente.nombre }}
+                                {% endif %}
+                            </td>
+                            <td>{{ clase.titulo }}</td>
+                            <td>{{ clase.duracion_minutos }} min</td>
+                            <td>${{ "%.2f"|format(clase.monto) }}</td>
+                            <td>
+                                {% if clase.estado == 'confirmada' %}
+                                <span class="badge bg-success">{{ clase.estado }}</span>
+                                {% elif clase.estado == 'pendiente' %}
+                                <span class="badge bg-warning">{{ clase.estado }}</span>
+                                {% elif clase.estado == 'completada' %}
+                                <span class="badge bg-primary">{{ clase.estado }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ clase.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('main.detalle_clase', clase_id=clase.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                                {% if clase.estado_pago and clase.estado == 'confirmada' %}
+                                <a href="{{ clase.link_jitsi }}" target="_blank" 
+                                   class="btn btn-sm btn-success">
+                                    <i class="fas fa-video me-1"></i>Unirse
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            {% if clases.pages > 1 %}
+            <nav aria-label="Paginación">
+                <ul class="pagination justify-content-center mt-3">
+                    {% if clases.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.mis_clases', page=clases.prev_num) }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in clases.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {{ 'active' if page_num == clases.page }}">
+                                <a class="page-link" href="{{ url_for('main.mis_clases', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if clases.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.mis_clases', page=clases.next_num) }}">Siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No tienes clases registradas todavía.
+        {% if current_user.rol == 'cliente' %}
+        <a href="{{ url_for('main.docentes') }}">Busca un docente</a> para comenzar.
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

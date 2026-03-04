@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Docentes - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4"><i class="fas fa-chalkboard-teacher me-2"></i>Encuentra tu Docente Ideal</h1>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="buscar" class="form-control" 
+                           placeholder="Buscar por nombre o especialidad..." 
+                           value="{{ request.args.get('buscar', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="especialidad" class="form-select">
+                        <option value="">Todas las especialidades</option>
+                        {% for esp in especialidades %}
+                        <option value="{{ esp }}" {{ 'selected' if request.args.get('especialidad') == esp }}>
+                            {{ esp }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Resultados -->
+    {% if docentes.items %}
+    <div class="row">
+        {% for docente in docentes.items %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if docente.usuario.avatar_url %}
+                        <img src="{{ docente.usuario.avatar_url }}" class="rounded-circle" 
+                             width="80" height="80" alt="{{ docente.usuario.nombre }}">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-5x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title text-center">{{ docente.usuario.nombre }}</h5>
+                    <p class="text-center text-muted">{{ docente.especialidad }}</p>
+                    
+                    {% if docente.descripcion %}
+                    <p class="card-text small text-truncate-3">{{ docente.descripcion[:150] }}...</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            <i class="fas fa-star text-warning me-1"></i>
+                            <strong>{{ "%.1f"|format(docente.promedio_calificacion) }}</strong>
+                        </span>
+                        <span class="text-muted small">({{ docente.total_resenas }} reseñas)</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">
+                            <i class="fas fa-graduation-cap me-1"></i>
+                            {{ docente.total_clases }} clases
+                        </span>
+                        <span class="fw-bold text-success">
+                            ${{ "%.2f"|format(docente.precio_hora) }}/h
+                        </span>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.perfil_docente', docente_id=docente.id) }}" 
+                           class="btn btn-primary">
+                            Ver Perfil
+                        </a>
+                        {% if current_user.is_authenticated and current_user.rol == 'cliente' %}
+                        <a href="{{ url_for('main.reservar_clase', docente_id=docente.id) }}" 
+                           class="btn btn-outline-success">
+                            Reservar Clase
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Paginación -->
+    {% if docentes.pages > 1 %}
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            {% if docentes.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('main.docentes', page=docentes.prev_num, 
+                                                      buscar=request.args.get('buscar', ''),
+                                                      especialidad=request.args.get('especialidad', '')) }}">
+                    Anterior
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in docentes.iter_pages() %}
+                {% if page_num %}
+                    <li class="page-item {{ 'active' if page_num == docentes.page }}">
+                        <a class="page-link" href="{{ url_for('main.docentes', page=page_num,
+                                                              buscar=request.args.get('buscar', ''),
+                                                              especialidad=request.args.get('especialidad', '')) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if docentes.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('main.docentes', page=docentes.next_num,
+                                                      buscar=request.args.get('buscar', ''),
+                                                      especialidad=request.args.get('especialidad', '')) }}">
+                    Siguiente
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle fa-3x mb-3"></i>
+        <h4>No se encontraron docentes</h4>
+        <p>Intenta con otros filtros de búsqueda</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

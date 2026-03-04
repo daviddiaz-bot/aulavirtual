@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Política de Privacidad - Aula Virtual{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <h1 class="display-4 fw-bold text-center mb-4">Política de Privacidad</h1>
+            <p class="text-center text-muted mb-5">Última actualización: Enero 2024</p>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-5">
+                    <div class="alert alert-info">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        En Aula Virtual, tu privacidad es nuestra prioridad. Esta política explica cómo recopilamos, usamos y protegemos tu información personal.
+                    </div>
+
+                    <h3 class="mt-4 mb-3">1. Información que Recopilamos</h3>
+                    
+                    <h5>1.1 Información que nos Proporcionas</h5>
+                    <ul>
+                        <li><strong>Registro:</strong> Nombre, email, contraseña, foto de perfil</li>
+                        <li><strong>Perfil de Docente:</strong> Especialidades, experiencia, certificaciones, tarifa por hora</li>
+                        <li><strong>Pagos:</strong> Información de facturación (procesada por Stripe, no la almacenamos)</li>
+                        <li><strong>Comunicaciones:</strong> Mensajes con otros usuarios, reseñas, comentarios</li>
+                    </ul>
+
+                    <h5>1.2 Información Recopilada Automáticamente</h5>
+                    <ul>
+                        <li><strong>Datos de uso:</strong> Páginas visitadas, tiempo de sesión, clases reservadas</li>
+                        <li><strong>Información técnica:</strong> Dirección IP, tipo de navegador, dispositivo, sistema operativo</li>
+                        <li><strong>Cookies:</strong> Usamos cookies para mejorar tu experiencia (ver sección 7)</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">2. Cómo Usamos tu Información</h3>
+                    <p>Usamos tu información para:</p>
+                    <ul>
+                        <li>Facilitar las conexiones entre estudiantes y docentes</li>
+                        <li>Procesar pagos y transacciones</li>
+                        <li>Enviar notificaciones sobre clases reservadas</li>
+                        <li>Mejorar nuestros servicios y experiencia de usuario</li>
+                        <li>Detectar y prevenir fraudes</li>
+                        <li>Cumplir con obligaciones legales</li>
+                        <li>Comunicar actualizaciones importantes de la plataforma</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">3. Compartir tu Información</h3>
+                    <p>No vendemos tu información personal. Solo la compartimos en estos casos:</p>
+                    
+                    <h5>3.1 Con Otros Usuarios</h5>
+                    <ul>
+                        <li>Tu perfil público es visible para todos los usuarios</li>
+                        <li>Los estudiantes ven información de docentes (especialidad, calificación, tarifa)</li>
+                        <li>Los docentes ven nombre básico y foto de estudiantes reservados</li>
+                    </ul>
+
+                    <h5>3.2 Con Proveedores de Servicios</h5>
+                    <ul>
+                        <li><strong>Stripe:</strong> Procesamiento de pagos</li>
+                        <li><strong>AWS/DigitalOcean:</strong> Hosting e infraestructura</li>
+                        <li><strong>SendGrid:</strong> Envío de emails transaccionales</li>
+                        <li><strong>Jitsi Meet:</strong> Videollamadas</li>
+                    </ul>
+
+                    <h5>3.3 Por Requerimientos Legales</h5>
+                    <p>Podemos divulgar información si es requerido por ley o en respuesta a procesos legales válidos.</p>
+
+                    <h3 class="mt-4 mb-3">4. Seguridad de los Datos</h3>
+                    <p>Implementamos múltiples medidas de seguridad:</p>
+                    <ul>
+                        <li><strong>Cifrado:</strong> Todas las conexiones usan HTTPS/SSL</li>
+                        <li><strong>Contraseñas:</strong> Hasheadas con bcrypt (nunca almacenamos contraseñas en texto plano)</li>
+                        <li><strong>Autenticación de dos factores (2FA):</strong> Disponible para todos los usuarios</li>
+                        <li><strong>Firewall y monitoreo:</strong> Protección contra ataques y accesos no autorizados</li>
+                        <li><strong>Backups regulares:</strong> Copias de seguridad diarias cifradas</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">5. Retención de Datos</h3>
+                    <ul>
+                        <li><strong>Cuentas activas:</strong> Mantenemos los datos mientras tu cuenta esté activa</li>
+                        <li><strong>Cuentas cerradas:</strong> Datos eliminados después de 90 días (excepto lo requerido legalmente)</li>
+                        <li><strong>Registros financieros:</strong> Mantenidos por 7 años para cumplimiento fiscal</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">6. Tus Derechos</h3>
+                    <p>Tienes derecho a:</p>
+                    <ul>
+                        <li><strong>Acceder:</strong> Solicitar una copia de tus datos personales</li>
+                        <li><strong>Rectificar:</strong> Corregir información incorrecta</li>
+                        <li><strong>Eliminar:</strong> Solicitar la eliminación de tu cuenta y datos</li>
+                        <li><strong>Portabilidad:</strong> Recibir tus datos en formato estructurado</li>
+                        <li><strong>Oposición:</strong> Oponerte al procesamiento de tus datos en ciertos casos</li>
+                        <li><strong>Retirar consentimiento:</strong> En cualquier momento</li>
+                    </ul>
+                    <p>Para ejercer estos derechos, contáctanos en: <a href="mailto:privacidad@aulavirtual.com">privacidad@aulavirtual.com</a></p>
+
+                    <h3 class="mt-4 mb-3">7. Cookies y Tecnologías Similares</h3>
+                    <p>Usamos cookies para mejorar tu experiencia:</p>
+                    
+                    <h5>7.1 Cookies Esenciales</h5>
+                    <p>Necesarias para el funcionamiento básico (inicio de sesión, carrito, seguridad).</p>
+
+                    <h5>7.2 Cookies de Rendimiento</h5>
+                    <p>Nos ayudan a entender cómo interactúas con la plataforma para mejorarla.</p>
+
+                    <h5>7.3 Cookies de Marketing</h5>
+                    <p>Usadas para mostrar anuncios relevantes (puedes desactivarlas en configuración).</p>
+
+                    <p class="mt-3">Puedes controlar cookies desde tu navegador. Ten en cuenta que deshabilitar cookies puede afectar la funcionalidad de la plataforma.</p>
+
+                    <h3 class="mt-4 mb-3">8. Privacidad de Menores</h3>
+                    <p>Nuestra plataforma no está dirigida a menores de 16 años. Los usuarios entre 16-18 años necesitan consentimiento parental. No recopilamos intencionalmente información de menores de 16 años.</p>
+
+                    <h3 class="mt-4 mb-3">9. Transferencias Internacionales</h3>
+                    <p>Tus datos pueden ser transferidos y procesados en países fuera de tu residencia. Aseguramos protecciones adecuadas mediante:</p>
+                    <ul>
+                        <li>Cláusulas contractuales estándar</li>
+                        <li>Certificaciones de Privacy Shield</li>
+                        <li>Medidas técnicas y organizativas apropiadas</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">10. Cambios a esta Política</h3>
+                    <p>Podemos actualizar esta política ocasionalmente. Te notificaremos sobre cambios significativos por email o mediante un aviso destacado en la plataforma. La fecha de "Última actualización" al inicio refleja cuándo fue modificada por última vez.</p>
+
+                    <h3 class="mt-4 mb-3">11. Cumplimiento Legal</h3>
+                    <p>Esta política cumple con:</p>
+                    <ul>
+                        <li><strong>GDPR:</strong> Reglamento General de Protección de Datos (UE)</li>
+                        <li><strong>CCPA:</strong> Ley de Privacidad del Consumidor de California</li>
+                        <li><strong>LGPD:</strong> Ley General de Protección de Datos (Brasil)</li>
+                    </ul>
+
+                    <h3 class="mt-4 mb-3">12. Contacto</h3>
+                    <p>Para preguntas sobre privacidad o para ejercer tus derechos:</p>
+                    <p>
+                        <strong>Email:</strong> privacidad@aulavirtual.com<br>
+                        <strong>Oficial de Protección de Datos:</strong> dpo@aulavirtual.com<br>
+                        <strong>Teléfono:</strong> +1 (555) 123-4567<br>
+                        <strong>Correo Postal:</strong> 123 Education Street, San Francisco, CA 94102
+                    </p>
+
+                    <div class="alert alert-success mt-5">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Compromiso:</strong> Estamos comprometidos con proteger tu privacidad y mantener la transparencia sobre cómo manejamos tu información.
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('main.terminos') }}" class="btn btn-outline-primary me-2">Ver Términos y Condiciones</a>
+                        <a href="{{ url_for('main.contacto') }}" class="btn btn-outline-secondary">Contactar sobre Privacidad</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
