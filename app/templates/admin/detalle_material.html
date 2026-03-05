@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle Material - Panel Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-pdf me-2"></i>Detalles del Material</h1>
+        <a href="{{ url_for('admin.materiales') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Lista
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Información del Material -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Material</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="200">ID:</th>
+                            <td>{{ material.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Título:</th>
+                            <td><strong>{{ material.titulo }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Descripción:</th>
+                            <td>{{ material.descripcion or 'Sin descripción' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo:</th>
+                            <td><span class="badge bg-danger">PDF</span></td>
+                        </tr>
+                        <tr>
+                            <th>Tamaño:</th>
+                            <td>{{ "%.2f"|format(material.tamanio_kb / 1024) }} MB ({{ material.tamanio_kb }} KB)</td>
+                        </tr>
+                        <tr>
+                            <th>Ruta del Archivo:</th>
+                            <td><code>{{ material.archivo_path }}</code></td>
+                        </tr>
+                        <tr>
+                            <th>Descargas:</th>
+                            <td>{{ material.descargas }}</td>
+                        </tr>
+                        <tr>
+                            <th>Público:</th>
+                            <td>
+                                {% if material.publico %}
+                                <span class="badge bg-success">Sí</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Fecha de Subida:</th>
+                            <td>{{ material.fecha_subida.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Estudiantes con acceso -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Estudiantes con Acceso 
+                        <span class="badge bg-light text-dark">{{ material.estudiantes_compartidos|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if material.estudiantes_compartidos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Fecha Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante in material.estudiantes_compartidos %}
+                                <tr>
+                                    <td>{{ estudiante.id }}</td>
+                                    <td>{{ estudiante.nombre }}</td>
+                                    <td>{{ estudiante.email }}</td>
+                                    <td>{{ estudiante.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Este material no ha sido compartido con ningún estudiante aún.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Docente -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Docente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if material.docente.usuario.avatar_url %}
+                        <img src="{{ material.docente.usuario.avatar_url }}" 
+                             class="rounded-circle mb-2" width="80" height="80">
+                        {% else %}
+                        <div class="mb-2">
+                            <i class="fas fa-user-circle fa-4x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <h6>{{ material.docente.usuario.nombre }}</h6>
+                        <small class="text-muted">{{ material.docente.usuario.email }}</small>
+                    </div>
+                    <hr>
+                    <p><strong>Especialidad:</strong><br>{{ material.docente.especialidad or 'No especificada' }}</p>
+                    <p><strong>Calificación:</strong><br>
+                        <span class="badge bg-warning">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(material.docente.promedio_calificacion) }}
+                        </span>
+                    </p>
+                    <p><strong>Total Clases:</strong> {{ material.docente.total_clases }}</p>
+                    <p><strong>Verificado:</strong>
+                        {% if material.docente.verificado %}
+                        <span class="badge bg-success">Sí</span>
+                        {% else %}
+                        <span class="badge bg-warning">No</span>
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('admin.detalle_usuario', user_id=material.docente.usuario_id) }}" 
+                       class="btn btn-sm btn-outline-primary w-100">Ver Perfil Completo</a>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('main.descargar_material', material_id=material.id) }}" 
+                       class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-download me-1"></i>Descargar PDF
+                    </a>
+                    <form method="post" action="{{ url_for('admin.eliminar_material_admin', material_id=material.id) }}"
+                          onsubmit="return confirm('¿Estás seguro de eliminar este material? Esta acción no se puede deshacer.');">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-trash me-1"></i>Eliminar Material
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -107,7 +107,7 @@
     
     <!-- Acciones Rápidas -->
     <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <a href="{{ url_for('main.perfil') }}" class="card text-decoration-none">
                 <div class="card-body text-center">
                     <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
@@ -115,7 +115,15 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('main.mis_materiales') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                    <h5>Mis Materiales PDF</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
             <a href="{{ url_for('main.configuracion') }}" class="card text-decoration-none">
                 <div class="card-body text-center">
                     <i class="fas fa-cog fa-3x text-info mb-2"></i>
@@ -123,7 +131,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <a href="{{ url_for('main.finanzas') }}" class="card text-decoration-none">
                 <div class="card-body text-center">
                     <i class="fas fa-chart-line fa-3x text-success mb-2"></i>

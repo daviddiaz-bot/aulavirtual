@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Materiales PDF - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-pdf me-2"></i>Mis Materiales PDF</h1>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- Información de límites -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Límites:</strong> Puedes subir hasta {{ max_archivos }} archivos PDF. 
+        Tamaño máximo por archivo: 3 MB. 
+        Actualmente tienes <strong>{{ materiales|length }}</strong> de {{ max_archivos }} archivos.
+    </div>
+
+    <!-- Formulario de subida -->
+    {% if materiales|length < max_archivos %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Subir Nuevo PDF</h5>
+        </div>
+        <div class="card-body">
+            <form id="formSubirPDF" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="titulo" class="form-label">Título del Material *</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="archivo" class="form-label">Archivo PDF * (Máx. 3 MB)</label>
+                        <input type="file" class="form-control" id="archivo" name="archivo" accept=".pdf" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción (Opcional)</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnSubir">
+                    <i class="fas fa-upload me-1"></i>Subir PDF
+                </button>
+                <div id="progressBar" class="mt-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Has alcanzado el límite máximo de {{ max_archivos }} archivos. Elimina alguno para subir más.
+    </div>
+    {% endif %}
+
+    <!-- Lista de materiales -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Mis PDFs Subidos</h5>
+        </div>
+        <div class="card-body">
+            {% if materiales %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Tamaño</th>
+                            <th>Compartido con</th>
+                            <th>Descargas</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materiales %}
+                        <tr id="material-{{ material.id }}">
+                            <td>
+                                <i class="fas fa-file-pdf text-danger me-1"></i>
+                                {{ material.titulo }}
+                            </td>
+                            <td>{{ material.descripcion[:50] }}{% if material.descripcion|length > 50 %}...{% endif %}</td>
+                            <td>{{ "%.2f"|format(material.tamanio_kb / 1024) }} MB</td>
+                            <td>
+                                <span class="badge bg-info">{{ material.estudiantes_compartidos|length }} estudiante(s)</span>
+                            </td>
+                            <td>{{ material.descargas }}</td>
+                            <td>{{ material.fecha_subida.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-success" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalCompartir{{ material.id }}">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                    <a href="{{ url_for('main.descargar_material', material_id=material.id) }}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="eliminarMaterial({{ material.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Modal para compartir -->
+                        <div class="modal fade" id="modalCompartir{{ material.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Compartir: {{ material.titulo }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formCompartir{{ material.id }}">
+                                            <p>Selecciona los estudiantes con los que quieres compartir este material:</p>
+                                            {% if estudiantes %}
+                                            <div class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
+                                                {% for estudiante in estudiantes %}
+                                                <label class="list-group-item">
+                                                    <input class="form-check-input me-2" type="checkbox" 
+                                                           name="estudiante_ids" 
+                                                           value="{{ estudiante.id }}"
+                                                           {% if estudiante in material.estudiantes_compartidos %}checked{% endif %}>
+                                                    {{ estudiante.nombre }} ({{ estudiante.email }})
+                                                </label>
+                                                {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            <div class="alert alert-warning">
+                                                No tienes estudiantes aún. Los estudiantes aparecerán aquí cuando reserven clases contigo.
+                                            </div>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="button" class="btn btn-primary" 
+                                                onclick="compartirMaterial({{ material.id }})">
+                                            <i class="fas fa-share-alt me-1"></i>Compartir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aún no has subido ningún material PDF</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Subir PDF
+document.getElementById('formSubirPDF')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const btnSubir = document.getElementById('btnSubir');
+    const progressBar = document.getElementById('progressBar');
+    
+    // Validar tamaño del archivo
+    const archivo = document.getElementById('archivo').files[0];
+    if (archivo && archivo.size > 3 * 1024 * 1024) {
+        alert('El archivo excede el tamaño máximo de 3 MB');
+        return;
+    }
+    
+    btnSubir.disabled = true;
+    progressBar.style.display = 'block';
+    
+    try {
+        const response = await fetch('{{ url_for("main.subir_material") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('PDF subido correctamente');
+            location.reload();
+        } else {
+            alert(data.error || 'Error al subir el archivo');
+        }
+    } catch (error) {
+        alert('Error al subir el archivo: ' + error.message);
+    } finally {
+        btnSubir.disabled = false;
+        progressBar.style.display = 'none';
+    }
+});
+
+// Compartir material
+async function compartirMaterial(materialId) {
+    const form = document.getElementById('formCompartir' + materialId);
+    const checkboxes = form.querySelectorAll('input[name="estudiante_ids"]:checked');
+    const estudianteIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    
+    if (estudianteIds.length === 0) {
+        alert('Debes seleccionar al menos un estudiante');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/docente/materiales/${materialId}/compartir`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ estudiante_ids: estudianteIds })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Material compartido correctamente');
+            location.reload();
+        } else {
+            alert(data.error || 'Error al compartir el material');
+        }
+    } catch (error) {
+        alert('Error al compartir el material: ' + error.message);
+    }
+}
+
+// Eliminar material
+async function eliminarMaterial(materialId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este material? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/docente/materiales/${materialId}/eliminar`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Material eliminado correctamente');
+            location.reload();
+        } else {
+            alert(data.error || 'Error al eliminar el material');
+        }
+    } catch (error) {
+        alert('Error al eliminar el material: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

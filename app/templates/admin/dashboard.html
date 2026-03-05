@@ -212,6 +212,25 @@
             </a>
         </div>
         <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.retiros') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-hand-holding-usd fa-3x text-success mb-2"></i>
+                    <h6>Gestionar Retiros</h6>
+                    {% if retiros_pendientes > 0 %}
+                    <span class="badge bg-warning position-absolute top-0 end-0 m-2">{{ retiros_pendientes }}</span>
+                    {% endif %}
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.materiales') }}" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                    <h6>Gestionar Materiales</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
             <a href="{{ url_for('admin.reportes') }}" class="card text-decoration-none hover-shadow">
                 <div class="card-body text-center">
                     <i class="fas fa-chart-bar fa-3x text-info mb-2"></i>

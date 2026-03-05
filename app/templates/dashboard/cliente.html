@@ -84,6 +84,34 @@
         </div>
     </div>
     
+    <!-- Accesos Rápidos -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.docentes') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-2"></i>
+                    <h5>Buscar Docentes</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.mis_materiales_estudiante') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                    <h5>Mis Materiales PDF</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{{ url_for('main.perfil') }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-3x text-info mb-2"></i>
+                    <h5>Mi Perfil</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    
     <!-- Buscar Docentes -->
     <div class="row">
         <div class="col-12">

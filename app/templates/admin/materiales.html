@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Materiales - Panel Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-pdf me-2"></i>Gestión de Materiales PDF</h1>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Panel Admin
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-file-pdf me-2"></i>Total PDFs</h6>
+                    <p class="display-6">{{ total_materiales }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-download me-2"></i>Total Descargas</h6>
+                    <p class="display-6">{{ total_descargas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-database me-2"></i>Espacio Usado</h6>
+                    <p class="display-6">{{ tamanio_total_mb }} MB</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="docente_id" class="form-label">Filtrar por Docente</label>
+                    <select class="form-select" id="docente_id" name="docente_id">
+                        <option value="">Todos los docentes</option>
+                        {% for docente in docentes %}
+                        <option value="{{ docente.id }}" {% if docente.id == docente_filtro %}selected{% endif %}>
+                            {{ docente.usuario.nombre }} ({{ docente.usuario.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="buscar" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="buscar" name="buscar" 
+                           placeholder="Buscar por título o descripción..." value="{{ buscar }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de materiales -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Materiales en el Sistema 
+                <span class="badge bg-secondary">{{ materiales|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if materiales %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Docente</th>
+                            <th>Descripción</th>
+                            <th>Tamaño</th>
+                            <th>Compartido con</th>
+                            <th>Descargas</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materiales %}
+                        <tr id="material-{{ material.id }}">
+                            <td>{{ material.id }}</td>
+                            <td>
+                                <i class="fas fa-file-pdf text-danger me-1"></i>
+                                {{ material.titulo }}
+                            </td>
+                            <td>
+                                <small>
+                                    {{ material.docente.usuario.nombre }}<br>
+                                    <span class="text-muted">{{ material.docente.usuario.email }}</span>
+                                </small>
+                            </td>
+                            <td>
+                                <small>
+                                    {{ material.descripcion[:50] if material.descripcion else 'Sin descripción' }}
+                                    {% if material.descripcion and material.descripcion|length > 50 %}...{% endif %}
+                                </small>
+                            </td>
+                            <td>{{ "%.2f"|format(material.tamanio_kb / 1024) }} MB</td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ material.estudiantes_compartidos|length }} estudiante(s)
+                                </span>
+                            </td>
+                            <td>{{ material.descargas }}</td>
+                            <td>{{ material.fecha_subida.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('admin.detalle_material', material_id=material.id) }}" 
+                                       class="btn btn-sm btn-info" title="Ver Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('main.descargar_material', material_id=material.id) }}" 
+                                       class="btn btn-sm btn-success" title="Descargar">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="eliminarMaterial({{ material.id }})" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No se encontraron materiales con los filtros aplicados</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Eliminar material (depuración)
+async function eliminarMaterial(materialId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este material? Esta acción no se puede deshacer y eliminará el archivo del servidor.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin/materiales/${materialId}/eliminar`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Material eliminado correctamente');
+            location.reload();
+        } else {
+            alert('Error al eliminar el material');
+        }
+    } catch (error) {
+        alert('Error al eliminar el material: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

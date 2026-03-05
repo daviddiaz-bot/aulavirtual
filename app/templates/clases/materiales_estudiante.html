@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Materiales Compartidos - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-pdf me-2"></i>Materiales Compartidos Conmigo</h1>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if materiales %}
+            <div class="row">
+                {% for material in materiales %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="fas fa-file-pdf text-danger fa-3x me-3"></i>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ material.titulo }}</h5>
+                                    <small class="text-muted">
+                                        Por: {{ material.docente.usuario.nombre }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            {% if material.descripcion %}
+                            <p class="card-text">{{ material.descripcion }}</p>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ material.fecha_subida.strftime('%d/%m/%Y') }}
+                                </small>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="fas fa-weight me-1"></i>
+                                    {{ "%.2f"|format(material.tamanio_kb / 1024) }} MB
+                                </small>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="fas fa-download me-1"></i>
+                                    {{ material.descargas }} descargas
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('main.descargar_material', material_id=material.id) }}" 
+                               class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-download me-1"></i>Descargar PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No tienes materiales compartidos</h4>
+                <p class="text-muted">Tus docentes podrán compartir materiales PDF contigo para complementar tus clases</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

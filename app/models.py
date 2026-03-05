@@ -7,9 +7,17 @@ from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from sqlalchemy import func
 import pyotp
 import base64
 import os
+
+# Tabla de asociación para materiales compartidos con estudiantes
+material_estudiante = db.Table('material_estudiante',
+    db.Column('material_id', db.Integer, db.ForeignKey('materiales.id'), primary_key=True),
+    db.Column('estudiante_id', db.Integer, db.ForeignKey('usuarios.id'), primary_key=True),
+    db.Column('fecha_compartido', db.DateTime, default=datetime.utcnow)
+)
 
 
 class Usuario(UserMixin, db.Model):
@@ -100,6 +108,7 @@ class Docente(db.Model):
     descripcion = db.Column(db.Text)
     experiencia = db.Column(db.Text)
     educacion = db.Column(db.Text)
+    plan_estudio = db.Column(db.Text)  # Plan de estudio / Hoja de ruta
     precio_hora = db.Column(db.Float, nullable=False, default=0.0)
     disponibilidad = db.Column(db.Text)  # JSON con horarios
     calificacion_promedio = db.Column(db.Float, default=0.0)
@@ -107,10 +116,20 @@ class Docente(db.Model):
     verificado = db.Column(db.Boolean, default=False)
     fecha_aprobacion = db.Column(db.DateTime)
     
+    # Métodos de pago del docente
+    paypal_email = db.Column(db.String(100))  # Email de PayPal
+    stripe_account_id = db.Column(db.String(100))  # ID de Stripe Connect
+    banco_nombre = db.Column(db.String(100))  # Nombre del banco
+    banco_cuenta = db.Column(db.String(100))  # Número de cuenta (encriptado)
+    banco_titular = db.Column(db.String(200))  # Nombre del titular
+    banco_tipo = db.Column(db.String(50))  # Tipo: CLABE, CBU, IBAN, etc.
+    metodo_pago_preferido = db.Column(db.String(20), default='manual')  # manual, paypal, stripe, banco
+    
     # Relaciones
     clases = db.relationship('Clase', foreign_keys='Clase.docente_id', backref='docente_rel', lazy='dynamic')
     resenas = db.relationship('Resena', backref='docente', lazy='dynamic')
     materiales = db.relationship('Material', backref='docente', lazy='dynamic')
+    retiros = db.relationship('Retiro', backref='docente', lazy='dynamic')
     
     @property
     def promedio_calificacion(self):
@@ -124,6 +143,38 @@ class Docente(db.Model):
     def total_resenas(self):
         """Total de reseñas"""
         return self.resenas.count()
+    
+    @property
+    def saldo_disponible(self):
+        """Calcular saldo disponible para retiro"""
+        # Ingresos de clases completadas
+        ingresos = db.session.query(func.sum(Clase.monto)).filter(
+            Clase.docente_id == self.id,
+            Clase.estado == 'completada',
+            Clase.estado_pago == True
+        ).scalar() or 0.0
+        
+        # Aplicar comisión del sistema (85% para el docente)
+        ingresos_netos = ingresos * 0.85
+        
+        # Restar retiros ya pagados
+        retiros = db.session.query(func.sum(Retiro.monto)).filter(
+            Retiro.docente_id == self.id,
+            Retiro.estado.in_(['aprobado', 'pagado'])
+        ).scalar() or 0.0
+        
+        return round(ingresos_netos - retiros, 2)
+    
+    @property
+    def saldo_pendiente(self):
+        """Saldo de clases confirmadas pero no completadas"""
+        pendiente = db.session.query(func.sum(Clase.monto)).filter(
+            Clase.docente_id == self.id,
+            Clase.estado == 'confirmada',
+            Clase.estado_pago == True
+        ).scalar() or 0.0
+        
+        return round(pendiente * 0.85, 2)
     
     def __repr__(self):
         return f'<Docente {self.usuario.nombre}>'
@@ -222,6 +273,11 @@ class Material(db.Model):
     fecha_subida = db.Column(db.DateTime, default=datetime.utcnow)
     descargas = db.Column(db.Integer, default=0)
     
+    # Relación many-to-many con estudiantes
+    estudiantes_compartidos = db.relationship('Usuario', 
+                                             secondary=material_estudiante,
+                                             backref=db.backref('materiales_compartidos', lazy='dynamic'))
+    
     def __repr__(self):
         return f'<Material {self.titulo}>'
 
@@ -299,3 +355,38 @@ class Notificacion(db.Model):
     
     def __repr__(self):
         return f'<Notificacion {self.id} - {self.titulo}>'
+
+
+class Retiro(db.Model):
+    """Modelo de Retiro - Solicitudes de pago a docentes"""
+    
+    __tablename__ = 'retiros'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    docente_id = db.Column(db.Integer, db.ForeignKey('docentes.id'), nullable=False)
+    monto = db.Column(db.Float, nullable=False)
+    metodo_pago = db.Column(db.String(20))  # paypal, stripe, banco, manual
+    estado = db.Column(db.String(20), default='pendiente')  # pendiente, aprobado, rechazado, pagado
+    
+    # Datos del método de pago (copia al momento de la solicitud)
+    datos_pago = db.Column(db.Text)  # JSON con detalles del método de pago
+    
+    # Notas y seguimiento
+    notas_docente = db.Column(db.Text)  # Notas del docente al solicitar
+    notas_admin = db.Column(db.Text)  # Notas del admin
+    
+    # Comprobante
+    comprobante_url = db.Column(db.String(500))  # URL del comprobante de pago
+    transaction_id = db.Column(db.String(200))  # ID de transacción (PayPal, Stripe, etc.)
+    
+    # Fechas
+    fecha_solicitud = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha_aprobacion = db.Column(db.DateTime)
+    fecha_pago = db.Column(db.DateTime)
+    
+    # Usuario que aprobó/procesó
+    aprobado_por_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
+    aprobado_por = db.relationship('Usuario', foreign_keys=[aprobado_por_id], backref='retiros_aprobados')
+    
+    def __repr__(self):
+        return f'<Retiro {self.id} - ${self.monto} - {self.estado}>'
