@@ -83,7 +83,7 @@ class ProductionConfig(Config):
     """Configuración para producción"""
     DEBUG = False
     TESTING = False
-    SESSION_COOKIE_SECURE = True
+    # SESSION_COOKIE_SECURE se hereda de Config y lee de .env
     
     # Seguridad adicional en producción
     PREFERRED_URL_SCHEME = 'https'
