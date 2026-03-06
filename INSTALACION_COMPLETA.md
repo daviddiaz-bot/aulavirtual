@@ -931,6 +931,469 @@ docker-compose down -v  # ⚠️ Elimina TODOS los datos
 docker-compose up -d --build
 ```
 
+**Para problemas más complejos y detallados**: Ver **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** que incluye:
+- Error 500: Templates Admin Faltantes
+- Error: Atributos de Modelo Incorrectos  
+- Error: Endpoints Incorrectos
+- Error: Material Upload - Formulario No Aparece
+- Error 500: Vista Detalle Material
+- BuildError: Parámetro Incorrecto en URL
+- Error 500: Descarga de Materiales
+- Login Requiere Checkbox "Recordar" (SESSION_COOKIE_SECURE)
+- Limpieza de Cache Python
+
+---
+
+## ✅ POST-INSTALACIÓN Y VERIFICACIÓN
+
+### Verificar Estado del Sistema
+
+**1. Verificar que todos los containers están corriendo**:
+```bash
+docker-compose ps
+```
+
+**Output esperado** (todos deben estar "Up"):
+```
+NAME                        STATE    PORTS
+aulavirtual_nginx           Up       0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp
+aulavirtual_web             Up       0.0.0.0:5000->5000/tcp
+aulavirtual_db              Up       0.0.0.0:5432->5432/tcp
+aulavirtual_redis           Up       0.0.0.0:6379->6379/tcp
+aulavirtual_celery          Up       
+```
+
+**2. Verificar logs sin errores**:
+```bash
+# Revisar logs de aplicación web
+docker-compose logs --tail=50 web | grep -i error
+
+# Revisar logs de base de datos
+docker-compose logs --tail=50 db | grep -i error
+```
+
+**3. Test de conexión HTTP**:
+```bash
+# Desde el servidor
+curl -I http://localhost
+
+# Desde otro equipo en la red
+curl -I http://192.168.1.6
+```
+
+**Output esperado**:
+```
+HTTP/1.1 200 OK
+Server: nginx/1.25.x
+Content-Type: text/html; charset=utf-8
+```
+
+**4. Verificar base de datos**:
+```bash
+# Entrar a PostgreSQL
+docker-compose exec db psql -U postgres -d aulavirtual_db
+
+# Verificar tablas creadas
+\dt
+
+# Verificar usuario admin existe
+SELECT email, rol FROM usuario WHERE rol='admin';
+
+# Salir
+\q
+```
+
+**5. Verificar configuración Flask**:
+```bash
+# Ver configuración actual
+docker-compose exec web python -c "
+from app import create_app
+app = create_app()
+print('FLASK_ENV:', app.config.get('FLASK_ENV'))
+print('SECRET_KEY configured:', bool(app.config.get('SECRET_KEY')))
+print('DATABASE_URL:', app.config.get('SQLALCHEMY_DATABASE_URI'))
+print('REDIS_URL:', app.config.get('REDIS_URL'))
+print('SESSION_COOKIE_SECURE:', app.config.get('SESSION_COOKIE_SECURE'))
+"
+```
+
+**Output esperado**:
+```
+FLASK_ENV: production
+SECRET_KEY configured: True
+DATABASE_URL: postgresql://postgres:AulaVirtual2026!@db:5432/aulavirtual_db
+REDIS_URL: redis://redis:6379/0
+SESSION_COOKIE_SECURE: False  # Debe ser False si no hay HTTPS
+```
+
+### Configuraciones Post-Instalación
+
+**1. Cambiar Password del Admin**
+
+```bash
+# Opción A: Usando script Python
+docker-compose exec web python
+>>> from app.models import Usuario
+>>> from app import db, create_app
+>>> app = create_app()
+>>> with app.app_context():
+...     admin = Usuario.query.filter_by(email='admin@aulavirtual.com').first()
+...     admin.set_password('TuNuevaPasswordSegura123!')
+...     db.session.commit()
+...     print('Password actualizada')
+>>> exit()
+```
+
+```bash
+# Opción B: Usando script del proyecto
+cd /root/aulavirtual
+docker-compose exec web python reset_password_admin.py
+# Seguir las instrucciones
+```
+
+**2. Probar funcionalidad básica**:
+
+a) **Acceder a la interfaz web**:
+   - Abrir navegador: `http://192.168.1.6`
+   - Debe cargar la página de inicio
+
+b) **Login como admin**:
+   - Click en "Iniciar Sesión"
+   - Email: `admin@aulavirtual.com`
+   - Password: (el que configuraste)
+   - ✅ Debe iniciar sesión correctamente
+
+c) **Acceder al panel admin**:
+   - Una vez logueado, ir a `/admin`
+   - Debe mostrar dashboard con estadísticas
+
+d) **Probar registro de usuario**:
+   - Logout del admin
+   - Click en "Registrarse"
+   - Completar formulario
+   - ✅ Debe crear usuario y enviar email (si SMTP configurado)
+
+**3. Configurar Email SMTP (Gmail)**
+
+```bash
+# Editar .env
+nano /root/aulavirtual/.env
+```
+
+Agregar/verificar:
+```
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=tu_email@gmail.com
+MAIL_PASSWORD=tu_app_password_gmail
+MAIL_DEFAULT_SENDER=tu_email@gmail.com
+```
+
+**Obtener App Password de Gmail**:
+1. Ir a https://myaccount.google.com/apppasswords
+2. Seleccionar "Mail" y el dispositivo
+3. Copiar la contraseña de 16 caracteres
+4. Pegarla en MAIL_PASSWORD (sin espacios)
+
+Reiniciar para aplicar:
+```bash
+docker-compose restart web celery
+```
+
+**Probar envío de email**:
+```bash
+docker-compose exec web python -c "
+from app import create_app, mail
+from flask_mail import Message
+app = create_app()
+with app.app_context():
+    msg = Message(
+        'Test desde Aula Virtual',
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=['tu_email@gmail.com']
+    )
+    msg.body = 'Este es un email de prueba para verificar configuración SMTP'
+    try:
+        mail.send(msg)
+        print('✅ Email enviado correctamente')
+    except Exception as e:
+        print(f'❌ Error: {e}')
+"
+```
+
+**4. Configurar Stripe (Pagos)** - ⚠️ PENDIENTE
+
+```bash
+# Editar .env
+nano /root/aulavirtual/.env
+```
+
+Agregar:
+```
+STRIPE_PUBLISHABLE_KEY=pk_live_xxxxxxxxxxxxx
+STRIPE_SECRET_KEY=sk_live_xxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+```
+
+Obtener keys:
+1. Ir a https://dashboard.stripe.com/apikeys
+2. Copiar las keys (usar "Test mode" para pruebas)
+3. Configurar webhook en https://dashboard.stripe.com/webhooks
+   - URL: `https://tu-dominio.com/api/webhook/stripe`
+   - Eventos: `payment_intent.succeeded`, `payment_intent.payment_failed`
+
+Reiniciar:
+```bash
+docker-compose restart web
+```
+
+**5. Configurar Jitsi Meet (Videollamadas)**
+
+El sistema usa Jitsi Meet público por defecto. Para servidor privado:
+
+```bash
+# Editar .env
+nano /root/aulavirtual/.env
+```
+
+```
+# Opción 1: Usar servidor público (por defecto)
+JITSI_SERVER=meet.jit.si
+
+# Opción 2: Usar tu propio servidor Jitsi
+JITSI_SERVER=jitsi.tu-dominio.com
+```
+
+Ver [JITSI_MEET.md](./JITSI_MEET.md) para configurar servidor propio.
+
+### Configurar Backups Automáticos
+
+**Crear script de backup**:
+
+```bash
+# Crear directorio de backups
+mkdir -p /root/backups/aulavirtual
+
+# Crear script de backup
+nano /root/backups/backup-aulavirtual.sh
+```
+
+Contenido del script:
+```bash
+#!/bin/bash
+
+# Configuración
+BACKUP_DIR="/root/backups/aulavirtual"
+DATE=$(date +%Y%m%d_%H%M%S)
+RETENTION_DAYS=7
+
+# Crear backup de base de datos
+echo "Iniciando backup de base de datos..."
+cd /root/aulavirtual
+docker-compose exec -T db pg_dump -U postgres aulavirtual_db > ${BACKUP_DIR}/db_backup_${DATE}.sql
+
+# Comprimir backup
+gzip ${BACKUP_DIR}/db_backup_${DATE}.sql
+
+# Backup de archivos subidos
+echo "Backing up archivos subidos..."
+tar -czf ${BACKUP_DIR}/uploads_backup_${DATE}.tar.gz -C /root/aulavirtual app/static/uploads
+
+# Eliminar backups antiguos
+echo "Limpiando backups antiguos..."
+find ${BACKUP_DIR} -name "db_backup_*.sql.gz" -mtime +${RETENTION_DAYS} -delete
+find ${BACKUP_DIR} -name "uploads_backup_*.tar.gz" -mtime +${RETENTION_DAYS} -delete
+
+echo "Backup completado: ${DATE}"
+```
+
+```bash
+# Dar permisos de ejecución
+chmod +x /root/backups/backup-aulavirtual.sh
+
+# Probar el script
+/root/backups/backup-aulavirtual.sh
+```
+
+**Configurar cron job para backups automáticos**:
+
+```bash
+# Editar crontab
+crontab -e
+```
+
+Agregar línea (backup diario a las 2 AM):
+```
+0 2 * * * /root/backups/backup-aulavirtual.sh >> /var/log/aulavirtual-backup.log 2>&1
+```
+
+**Verificar backups**:
+```bash
+# Ver backups creados
+ls -lh /root/backups/aulavirtual/
+
+# Ver logs de backup
+tail -f /var/log/aulavirtual-backup.log
+```
+
+### Configurar SSL/HTTPS con Let's Encrypt
+
+**Prerequisitos**:
+- Tener un dominio apuntando al servidor
+- Puerto 80 y 443 abiertos en firewall
+
+**Instalar Certbot**:
+
+```bash
+# CentOS/RHEL
+sudo yum install -y certbot python3-certbot-nginx
+
+# Ubuntu/Debian
+sudo apt-get install -y certbot python3-certbot-nginx
+```
+
+**Obtener certificado**:
+
+```bash
+# Detener nginx temporalmente
+docker-compose stop nginx
+
+# Obtener certificado
+sudo certbot certonly --standalone -d aulavirtual.com -d www.aulavirtual.com
+
+# Los certificados se guardan en:
+# /etc/letsencrypt/live/aulavirtual.com/fullchain.pem
+# /etc/letsencrypt/live/aulavirtual.com/privkey.pem
+```
+
+**Configurar nginx para usar certificados**:
+
+```bash
+# Editar docker-compose.yml
+nano /root/aulavirtual/docker-compose.yml
+```
+
+Agregar volumen en nginx:
+```yaml
+nginx:
+  # ... resto de config ...
+  volumes:
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    - /etc/letsencrypt:/etc/letsencrypt:ro  # ← AGREGAR ESTA LÍNEA
+    - ./static:/usr/share/nginx/html/static:ro
+```
+
+```bash
+# Editar configuración de nginx
+nano /root/aulavirtual/nginx/nginx.conf
+```
+
+Agregar bloque SSL:
+```nginx
+server {
+    listen 80;
+    server_name aulavirtual.com www.aulavirtual.com;
+    
+    # Redirigir HTTP a HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name aulavirtual.com www.aulavirtual.com;
+
+    # Certificados SSL
+    ssl_certificate /etc/letsencrypt/live/aulavirtual.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/aulavirtual.com/privkey.pem;
+    
+    # Configuración SSL segura
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256';
+
+    # ... resto de configuración proxy_pass, etc ...
+}
+```
+
+```bash
+# Actualizar .env para HTTPS
+nano /root/aulavirtual/.env
+```
+
+```
+SESSION_COOKIE_SECURE=True  # ← Cambiar a True con HTTPS
+```
+
+```bash
+# Reiniciar
+docker-compose down
+docker-compose up -d
+```
+
+**Configurar renovación automática**:
+
+```bash
+# Probar renovación
+sudo certbot renew --dry-run
+
+# Agregar a crontab para renovación automática
+sudo crontab -e
+```
+
+Agregar línea (renovar cada 3 meses, a las 3 AM del día 1):
+```
+0 3 1 */3 * certbot renew --quiet && docker-compose -f /root/aulavirtual/docker-compose.yml restart nginx
+```
+
+### Monitoreo y Logs
+
+**Ver logs en tiempo real**:
+```bash
+# Todos los servicios
+docker-compose logs -f
+
+# Solo aplicación web
+docker-compose logs -f web
+
+# Con filtro de errores
+docker-compose logs -f web | grep -i error
+```
+
+**Configurar rotación de logs**:
+
+```bash
+# Crear configuración logrotate
+sudo nano /etc/logrotate.d/aulavirtual
+```
+
+Contenido:
+```
+/var/log/aulavirtual-backup.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 root root
+}
+```
+
+**Monitoreo de recursos**:
+
+```bash
+# Ver uso de CPU/Memoria de containers
+docker stats
+
+# Ver espacio en disco
+df -h
+docker system df
+
+# Ver logs de sistema
+journalctl -u docker -f
+```
+
 ---
 
 ## 📚 PRÓXIMOS PASOS

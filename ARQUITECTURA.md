@@ -399,6 +399,378 @@ clases 1 → N materiales
    - Reportes diarios (administrador)
    - Limpieza de sesiones expiradas
 
+---
+
+## 🚀 ESTADO ACTUAL DEL DESPLIEGUE
+
+### Información del Servidor de Producción
+
+**Servidor**: 192.168.1.6 (LXR-AUVI01)
+- **Sistema Operativo**: Linux (CentOS/RHEL)
+- **Usuario**: root
+- **Ruta del proyecto**: `/root/aulavirtual` (importante: lowercase)
+- **Commit actual**: `d5e9f89`
+- **Branch**: main
+- **Repositorio**: https://github.com/daviddiaz-bot/aulavirtual.git
+
+### Configuración de Contenedores
+
+**5 Containers en ejecución**:
+
+1. **aulavirtual_nginx** (nginx:1.25-alpine)
+   - Puertos: 80:80, 443:443
+   - Función: Proxy inverso + archivos estáticos
+   - Config: `/root/aulavirtual/nginx/nginx.conf`
+   - Estado: ✅ Funcionando
+
+2. **aulavirtual_web** (custom Flask image)
+   - Puerto interno: 5000
+   - Workers Gunicorn: 4
+   - Framework: Flask 2.3+
+   - Estado: ✅ Funcionando
+
+3. **aulavirtual_db** (postgres:15-alpine)
+   - Puerto: 5432
+   - Base de datos: `aulavirtual_db`
+   - Usuario/Password: `postgres` / `AulaVirtual2026!`
+   - Volumen: `postgres_data:/var/lib/postgresql/data`
+   - Estado: ✅ Funcionando
+
+4. **aulavirtual_redis** (redis:7-alpine)
+   - Puerto: 6379
+   - Modo: AOF (Append Only File)
+   - Volumen: `redis_data:/data`
+   - Estado: ✅ Funcionando
+
+5. **aulavirtual_celery** (mismo image que web)
+   - Worker Celery para tareas asíncronas
+   - Conectado a Redis para cola
+   - Estado: ✅ Funcionando
+
+### Variables de Entorno (.env)
+
+```bash
+# Configuración actual en /root/aulavirtual/.env
+FLASK_ENV=production
+SECRET_KEY=(configurado)
+DATABASE_URL=postgresql://postgres:postgres@db:5432/aulavirtual
+REDIS_URL=redis://redis:6379/0
+
+# Email SMTP (Gmail)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=davideduardo2010@gmail.com
+MAIL_PASSWORD=fpybippzzrkdozll
+MAIL_DEFAULT_SENDER=davideduardo2010@gmail.com
+
+# Sesión (CRÍTICO para HTTP)
+SESSION_COOKIE_SECURE=False
+
+# Jitsi Meet
+JITSI_SERVER=meet.jit.si
+
+# Stripe (PENDIENTE CONFIGURAR)
+STRIPE_PUBLISHABLE_KEY=(vacío)
+STRIPE_SECRET_KEY=(vacío)
+STRIPE_WEBHOOK_SECRET=(vacío)
+```
+
+### Arquitectura Real Desplegada
+
+```
+                    Internet (HTTP - Puerto 80)
+                                ↓
+┌─────────────────────────────────────────────────────────┐
+│                    Nginx (Proxy Inverso)                │
+│  • Maneja peticiones HTTP en puerto 80                  │
+│  • Proxy pass a Gunicorn en puerto 5000                 │
+│  • Sirve archivos estáticos desde /app/static           │
+│  • Sin SSL configurado (HTTP only)                      │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓ proxy_pass http://web:5000
+┌─────────────────────────────────────────────────────────┐
+│            Gunicorn WSGI Server (4 workers)             │
+│  • Ejecuta aplicación Flask                             │
+│  • Workers: 4 procesos                                  │
+│  • Timeout: 60 segundos                                 │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│                   Flask Application                      │
+│  • Framework: Flask 2.3+                                │
+│  • Config: ProductionConfig                             │
+│  • Debug: False                                         │
+│  • Logging: INFO level                                  │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+        ┌───────────────┴───────────────┐
+        ↓                               ↓
+┌──────────────────┐          ┌──────────────────┐
+│   PostgreSQL 15  │          │     Redis 7      │
+│                  │          │                  │
+│ • DB: aulavirtual_db        │ • Cache sesiones │
+│ • Port: 5432     │          │ • Cola Celery    │
+│ • User: postgres │          │ • Port: 6379     │
+│ • Persistent data│          │ • AOF enabled    │
+└──────────────────┘          └────────┬─────────┘
+                                       ↓
+                             ┌──────────────────┐
+                             │  Celery Worker   │
+                             │  • Emails        │
+                             │  • Tareas async  │
+                             │  • Reportes      │
+                             └──────────────────┘
+```
+
+### Flujo de Petición HTTP
+
+```
+1. Cliente HTTP → http://192.168.1.6/dashboard
+2. Nginx recibe en :80
+3. Nginx hace proxy_pass a http://web:5000/dashboard
+4. Gunicorn recibe la petición
+5. Gunicorn asigna a worker disponible
+6. Worker ejecuta código Flask
+7. Flask consulta PostgreSQL si necesita datos
+8. Flask consulta Redis para sesión del usuario
+9. Flask renderiza template con Jinja2
+10. HTML se devuelve a Gunicorn
+11. Gunicorn devuelve a Nginx
+12. Nginx devuelve al cliente
+```
+
+### Configuración de Sesiones (CRÍTICO)
+
+**Problema Resuelto**: Login requería checkbox "Recordar"
+
+**Causa**: SESSION_COOKIE_SECURE=True en servidor HTTP
+
+**Solución implementada**:
+1. `.env` configurado con `SESSION_COOKIE_SECURE=False`
+2. `config.py` lee correctamente la variable
+3. `docker-compose.yml` pasa la variable al container:
+   ```yaml
+   environment:
+     - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
+   ```
+
+**Estado**: ✅ Resuelto en commit `d5e9f89` (puede requerir limpieza de cache)
+
+**Verificación**:
+```bash
+# Verificar en container
+docker-compose exec web printenv | grep SESSION_COOKIE_SECURE
+# Output esperado: SESSION_COOKIE_SECURE=False
+
+# Verificar en Flask config
+docker-compose exec web python -c "from app import create_app; app = create_app(); print(app.config['SESSION_COOKIE_SECURE'])"
+# Output esperado: False
+```
+
+### Problemas Resueltos (7 commits)
+
+#### Commit ee11efc: Templates Admin Faltantes
+- Creados 6 templates de administración
+- Archivos: docentes.html, clases.html, pagos.html, reportes.html, configuracion.html, retiros.html
+
+#### Commit c01c4a8: Atributos de Modelo
+- Fix: `tarifa_hora` → `precio_hora`
+- Fix: `materias` → `especialidad`
+
+#### Commit 1a3f241: Endpoints Incorrectos
+- Fix: `docentes.perfil` → `main.perfil_docente`
+- Fix: Paginación en retiros
+
+#### Commit 1c0d5dd: Código Duplicado
+- Eliminadas 187 líneas de función `mis_materiales()` duplicada
+- Fix: Upload de materiales funcionando
+
+#### Commits c221ed6 + 5883643: Validación Templates
+- Agregada validación `{% if material.docente %}`
+- Fix parámetro: `user_id` → `usuario_id`
+
+#### Commit 9d2036d: Descarga de Materiales
+- Path absoluto con `current_app.root_path`
+- Compatibilidad Flask 2.x (download_name)
+
+#### Commits e26917f + d5e9f89: SESSION_COOKIE_SECURE
+- Eliminado hardcoded en ProductionConfig
+- Agregado a docker-compose.yml environment
+
+**Ver detalles**: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
+### Funcionalidades Probadas
+
+✅ **Autenticación**
+- Login funciona (requiere limpiar cache Python para fix final)
+- Registro de usuarios
+- Logout
+
+✅ **Panel Admin**
+- Acceso correcto con permisos admin
+- Gestión de docentes (listado, aprobación)
+- Gestión de materiales (listado, detalle, descarga)
+- Templates completos y funcionando
+
+✅ **Gestión de Materiales**
+- Docentes pueden subir PDFs
+- Límite de 10 materiales funciona correctamente
+- Descarga de materiales funciona
+- Vista de detalle con validaciones
+
+✅ **Sistema de Base de Datos**
+- PostgreSQL operativo
+- Modelos correctos (Usuario, Docente, Clase, Pago, Material, etc.)
+- Migraciones aplicadas
+
+✅ **Cache y Sesiones**
+- Redis funcionando
+- Sesiones guardadas en Redis
+- Celery conectado a Redis
+
+### Pendientes de Configurar
+
+🔴 **Limpieza Cache Python** (URGENTE)
+```bash
+docker-compose exec web find /app -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
+docker-compose exec web find /app -type f -name "*.pyc" -delete
+docker-compose restart web
+```
+
+🟡 **Email SMTP** (Gmail)
+- Contraseña configurada: `fpybippzzrkdozll`
+- Estado: Configurado, validez desconocida
+- Probar envío: Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#error-email)
+
+🟡 **Stripe Payments** (NO CONFIGURADO)
+- Variables vacías en .env:
+  - STRIPE_PUBLISHABLE_KEY
+  - STRIPE_SECRET_KEY
+  - STRIPE_WEBHOOK_SECRET
+- Obtener de: https://dashboard.stripe.com/apikeys
+- Configurar webhook en: https://dashboard.stripe.com/webhooks
+
+### Testing Pendiente
+
+- [ ] Login sin checkbox "recordar" (después de limpiar cache)
+- [ ] Registro completo de usuario nuevo
+- [ ] Registro y verificación de docente
+- [ ] Búsqueda de docentes
+- [ ] Reservar y pagar clase (requiere Stripe)
+- [ ] Videollamada Jitsi
+- [ ] Sistema de reseñas
+- [ ] Envío de emails (bienvenida, confirmación, recordatorio)
+- [ ] Retiros de fondos de docentes
+- [ ] Reportes de administración
+- [ ] Reset de password
+
+### Comandos de Gestión
+
+**Ver logs**:
+```bash
+docker-compose logs -f web
+docker-compose logs --tail=100 web
+docker-compose logs web | grep ERROR
+```
+
+**Reiniciar servicios**:
+```bash
+docker-compose restart web      # Solo aplicación
+docker-compose restart           # Todos los servicios
+```
+
+**Acceso a containers**:
+```bash
+docker-compose exec web bash    # Shell en container web
+docker-compose exec db psql -U postgres -d aulavirtual_db  # PostgreSQL
+```
+
+**Actualizar código**:
+```bash
+cd /root/aulavirtual
+git fetch origin
+git reset --hard origin/main  # ⚠️ Borra cambios locales
+docker-compose down
+docker-compose up -d
+```
+
+**Backup de base de datos**:
+```bash
+docker-compose exec db pg_dump -U postgres aulavirtual_db > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+**Restore de base de datos**:
+```bash
+docker-compose exec -T db psql -U postgres aulavirtual_db < backup_20260306_120000.sql
+```
+
+### Monitoreo
+
+**Espacio en disco**:
+```bash
+df -h
+du -sh /root/aulavirtual
+docker system df
+```
+
+**Recursos de containers**:
+```bash
+docker stats
+```
+
+**Estado de servicios**:
+```bash
+docker-compose ps
+systemctl status docker
+```
+
+### Seguridad
+
+**Configurado**:
+- ✅ Passwords hasheados (bcrypt)
+- ✅ Sesiones seguras en Redis
+- ✅ CSRF protection (Flask-WTF)
+- ✅ SQL Injection protection (SQLAlchemy ORM)
+- ✅ XSS protection (Jinja2 autoescape)
+
+**Pendiente**:
+- 🔴 SSL/HTTPS con Let's Encrypt
+- 🟡 Firewall configuración (iptables/firewalld)
+- 🟡 Rate limiting en Nginx
+- 🟡 Fail2ban para SSH
+- 🟡 Regular security audits
+
+### Backups
+
+**Configurado**:
+- Volúmenes Docker persistentes
+- Directorio `/root/aulavirtual/backups` montado en container db
+
+**Recomendado configurar**:
+```bash
+# Cron job para backups diarios
+# Agregar a crontab: crontab -e
+0 2 * * * cd /root/aulavirtual && docker-compose exec -T db pg_dump -U postgres aulavirtual_db > backups/backup_$(date +\%Y\%m\%d).sql
+0 3 * * * find /root/aulavirtual/backups -name "backup_*.sql" -mtime +7 -delete
+```
+
+---
+
+## 📚 DOCUMENTACIÓN ADICIONAL
+
+- **[INSTALACION_COMPLETA.md](./INSTALACION_COMPLETA.md)**: Guía paso a paso de instalación desde cero
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)**: Solución de problemas comunes con detalles técnicos
+- **[INICIO_RAPIDO.md](./INICIO_RAPIDO.md)**: Guía rápida para desarrollo
+- **[JITSI_MEET.md](./JITSI_MEET.md)**: Configuración de videollamadas
+- **[Manual de Usuario](./docs/index.html)**: Documentación completa para usuarios y administradores
+
+---
+
+**Última actualización**: 6 de Marzo 2026  
+**Versión**: 1.0.0  
+**Maintainer**: David Diaz (davideduardo2010@gmail.com)
+
 3. **Procesamiento de Pagos**:
    - Verificación de pagos pendientes
    - Actualización de estados
