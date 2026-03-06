@@ -19,6 +19,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - REDIS_URL=redis://redis:6379/0
       - FLASK_ENV=production
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
     depends_on:
       - db
       - redis
