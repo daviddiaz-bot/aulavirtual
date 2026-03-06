@@ -5,7 +5,7 @@ Maneja las vistas principales de la aplicación
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, send_file
 from flask_login import login_required, current_user
-from .models import Usuario, Docente, Clase, Pago, Resena, Material, Calificacion, Notificacion, Retiro, db
+from .models import Usuario, Docente, Clase, Pago, Resena, Material, Calificacion, Notificacion, Retiro, DisponibilidadDocente, BloqueNoDisponible, db
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_
 from werkzeug.utils import secure_filename
@@ -176,6 +176,12 @@ def reservar_clase(docente_id):
             
             fecha_fin = fecha_inicio + timedelta(minutes=duracion)
             
+            # Verificar disponibilidad del docente
+            disponible, mensaje = docente.esta_disponible(fecha_inicio, fecha_fin)
+            if not disponible:
+                flash(f'El docente no está disponible: {mensaje}', 'warning')
+                return render_template('clases/reservar.html', docente=docente)
+            
             # Calcular monto
             monto = (duracion / 60) * docente.precio_hora
             
@@ -190,11 +196,15 @@ def reservar_clase(docente_id):
                 duracion_minutos=duracion,
                 monto=monto,
                 estado='pendiente',
-                link_jitsi=f"https://{current_app.config.get('JITSI_SERVER', 'meet.jit.si')}/clase-{uuid.uuid4().hex[:10]}"
+                acceso_unico=True,  # Por defecto, acceso único
+                regenerar_link=True  # Por defecto, regenerar link después de primer acceso
             )
             
             db.session.add(clase)
             db.session.commit()
+            
+            # Generar link inicial de Jitsi
+            clase.generar_nuevo_link_jitsi()
             
             # Redirigir a pago
             return redirect(url_for('main.pagar_clase', clase_id=clase.id))
@@ -364,6 +374,54 @@ def detalle_clase(clase_id):
                          calificaciones=calificaciones)
 
 
+@main.route('/clase/<int:clase_id>/unirse')
+@login_required
+def unirse_clase(clase_id):
+    """Unirse a una clase (acceso controlado a Jitsi)"""
+    clase = Clase.query.get_or_404(clase_id)
+    
+    # Verificar automáticamente si la clase debe cerrarse
+    clase.cerrar_automaticamente()
+    
+    # Determinar si es docente o estudiante
+    es_docente = False
+    if current_user.rol == 'docente':
+        docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+        if docente and clase.docente_id == docente.id:
+            es_docente = True
+        else:
+            flash('No tienes permiso para acceder a esta clase', 'danger')
+            return redirect(url_for('main.dashboard'))
+    elif current_user.rol == 'cliente':
+        if clase.cliente_id != current_user.id:
+            flash('No tienes permiso para acceder a esta clase', 'danger')
+            return redirect(url_for('main.dashboard'))
+    else:
+        # Administradores pueden acceder
+        if current_user.rol != 'admin':
+            flash('No tienes permiso para acceder a esta clase', 'danger')
+            return redirect(url_for('main.dashboard'))
+    
+    # Verificar si puede acceder
+    puede_acceder, mensaje = clase.puede_acceder(current_user.id, es_docente)
+    
+    if not puede_acceder:
+        flash(mensaje, 'warning')
+        return redirect(url_for('main.detalle_clase', clase_id=clase_id))
+    
+    # Capturar el link ACTUAL antes de registrar el acceso
+    # Este es el link que usará el usuario en ESTA sesión
+    link_para_esta_sesion = clase.link_jitsi
+    
+    # Registrar acceso y potencialmente regenerar para la PRÓXIMA vez
+    if current_user.rol != 'admin':  # No contar accesos de administradores
+        clase.registrar_acceso(current_user.id, es_docente)
+    
+    # Redirigir usando el link que corresponde a ESTA sesión
+    # (el nuevo link generado será para accesos futuros)
+    return redirect(link_para_esta_sesion)
+
+
 @main.route('/perfil')
 @login_required
 def perfil():
@@ -450,6 +508,176 @@ def completar_perfil_docente():
         return redirect(url_for('main.dashboard'))
     
     return render_template('perfil/completar_docente.html', docente=docente)
+
+
+# ==================== DISPONIBILIDAD HORARIA ====================
+
+@main.route('/disponibilidad')
+@login_required
+def disponibilidad():
+    """Gestión de disponibilidad horaria del docente"""
+    if current_user.rol != 'docente':
+        flash('Esta función es solo para docentes', 'warning')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Completa tu perfil de docente primero', 'warning')
+        return redirect(url_for('main.completar_perfil_docente'))
+    
+    # Obtener disponibilidades
+    disponibilidades = DisponibilidadDocente.query.filter_by(
+        docente_id=docente.id
+    ).order_by(DisponibilidadDocente.dia_semana, DisponibilidadDocente.hora_inicio).all()
+    
+    # Obtener bloques no disponibles
+    bloques = BloqueNoDisponible.query.filter_by(
+        docente_id=docente.id,
+        fecha_fin__gte=datetime.utcnow()
+    ).order_by(BloqueNoDisponible.fecha_inicio).all()
+    
+    return render_template('docentes/disponibilidad.html', 
+                         docente=docente,
+                         disponibilidades=disponibilidades,
+                         bloques=bloques)
+
+
+@main.route('/disponibilidad/agregar', methods=['POST'])
+@login_required
+def agregar_disponibilidad():
+    """Agregar horario disponible"""
+    if current_user.rol != 'docente':
+        return jsonify({'error': 'No autorizado'}), 403
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        return jsonify({'error': 'Perfil incompleto'}), 400
+    
+    try:
+        dia_semana = int(request.form.get('dia_semana'))
+        hora_inicio_str = request.form.get('hora_inicio')
+        hora_fin_str = request.form.get('hora_fin')
+        
+        # Convertir a time
+        hora_inicio = datetime.strptime(hora_inicio_str, '%H:%M').time()
+        hora_fin = datetime.strptime(hora_fin_str, '%H:%M').time()
+        
+        # Validar
+        if hora_inicio >= hora_fin:
+            flash('La hora de inicio debe ser menor que la hora de fin', 'danger')
+            return redirect(url_for('main.disponibilidad'))
+        
+        if dia_semana < 0 or dia_semana > 6:
+            flash('Día de la semana inválido', 'danger')
+            return redirect(url_for('main.disponibilidad'))
+        
+        # Crear disponibilidad
+        disponibilidad = DisponibilidadDocente(
+            docente_id=docente.id,
+            dia_semana=dia_semana,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin
+        )
+        
+        db.session.add(disponibilidad)
+        db.session.commit()
+        
+        flash('Horario agregado correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al agregar horario: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.disponibilidad'))
+
+
+@main.route('/disponibilidad/<int:id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_disponibilidad(id):
+    """Eliminar horario disponible"""
+    if current_user.rol != 'docente':
+        return jsonify({'error': 'No autorizado'}), 403
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    disponibilidad = DisponibilidadDocente.query.get_or_404(id)
+    
+    if disponibilidad.docente_id != docente.id:
+        flash('No tienes permiso para eliminar este horario', 'danger')
+        return redirect(url_for('main.disponibilidad'))
+    
+    db.session.delete(disponibilidad)
+    db.session.commit()
+    
+    flash('Horario eliminado correctamente', 'success')
+    return redirect(url_for('main.disponibilidad'))
+
+
+@main.route('/disponibilidad/bloquear', methods=['POST'])
+@login_required
+def bloquear_fechas():
+    """Bloquear fechas específicas"""
+    if current_user.rol != 'docente':
+        return jsonify({'error': 'No autorizado'}), 403
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        return jsonify({'error': 'Perfil incompleto'}), 400
+    
+    try:
+        fecha_inicio_str = request.form.get('fecha_inicio')
+        fecha_fin_str = request.form.get('fecha_fin')
+        motivo = request.form.get('motivo', '').strip()
+        
+        # Convertir a datetime
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
+        
+        # Validar
+        if fecha_inicio >= fecha_fin:
+            flash('La fecha de inicio debe ser menor que la fecha de fin', 'danger')
+            return redirect(url_for('main.disponibilidad'))
+        
+        if fecha_fin < datetime.utcnow():
+            flash('No puedes bloquear fechas en el pasado', 'danger')
+            return redirect(url_for('main.disponibilidad'))
+        
+        # Crear bloqueo
+        bloque = BloqueNoDisponible(
+            docente_id=docente.id,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin,
+            motivo=motivo
+        )
+        
+        db.session.add(bloque)
+        db.session.commit()
+        
+        flash('Fechas bloqueadas correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al bloquear fechas: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.disponibilidad'))
+
+
+@main.route('/disponibilidad/bloque/<int:id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_bloque(id):
+    """Eliminar bloque de fechas no disponibles"""
+    if current_user.rol != 'docente':
+        return jsonify({'error': 'No autorizado'}), 403
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    bloque = BloqueNoDisponible.query.get_or_404(id)
+    
+    if bloque.docente_id != docente.id:
+        flash('No tienes permiso para eliminar este bloqueo', 'danger')
+        return redirect(url_for('main.disponibilidad'))
+    
+    db.session.delete(bloque)
+    db.session.commit()
+    
+    flash('Bloqueo eliminado correctamente', 'success')
+    return redirect(url_for('main.disponibilidad'))
 
 
 # ==================== RUTAS ADICIONALES ====================

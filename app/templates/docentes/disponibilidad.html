@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Disponibilidad Horaria - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Gestión de Disponibilidad Horaria</h1>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Importante:</strong> Define aquí tus horarios disponibles para que los estudiantes solo puedan agendar clases en esos momentos.
+        También puedes bloquear fechas específicas (vacaciones, eventos personales, etc.).
+    </div>
+    
+    <!-- Disponibilidad Semanal -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Horarios Semanales</h5>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarHorario">
+                <i class="fas fa-plus me-1"></i>Agregar Horario
+            </button>
+        </div>
+        <div class="card-body">
+            {% if disponibilidades %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Día</th>
+                            <th>Hora Inicio</th>
+                            <th>Hora Fin</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
+                        {% for disp in disponibilidades %}
+                        <tr>
+                            <td><strong>{{ dias[disp.dia_semana] }}</strong></td>
+                            <td>{{ disp.hora_inicio.strftime('%H:%M') }}</td>
+                            <td>{{ disp.hora_fin.strftime('%H:%M') }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if disp.activo else 'secondary' }}">
+                                    {{ 'Activo' if disp.activo else 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('main.eliminar_disponibilidad', id=disp.id) }}" 
+                                      style="display: inline;" onsubmit="return confirm('¿Eliminar este horario?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No has definido horarios aún. Los estudiantes podrán reservar en cualquier momento.</p>
+            <p><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarHorario">
+                <i class="fas fa-plus me-2"></i>Agregar Primer Horario
+            </button></p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Bloques No Disponibles -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-ban me-2"></i>Fechas Bloqueadas</h5>
+            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modalBloquearFechas">
+                <i class="fas fa-lock me-1"></i>Bloquear Fechas
+            </button>
+        </div>
+        <div class="card-body">
+            {% if bloques %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Motivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bloque in bloques %}
+                        <tr>
+                            <td>{{ bloque.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ bloque.fecha_fin.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ bloque.motivo or 'Sin especificar' }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('main.eliminar_bloque', id=bloque.id) }}" 
+                                      style="display: inline;" onsubmit="return confirm('¿Eliminar este bloqueo?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes fechas bloqueadas.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Agregar Horario -->
+<div class="modal fade" id="modalAgregarHorario" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Horario Disponible</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.agregar_disponibilidad') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Día de la Semana</label>
+                        <select name="dia_semana" class="form-select" required>
+                            <option value="0">Lunes</option>
+                            <option value="1">Martes</option>
+                            <option value="2">Miércoles</option>
+                            <option value="3">Jueves</option>
+                            <option value="4">Viernes</option>
+                            <option value="5">Sábado</option>
+                            <option value="6">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hora Inicio</label>
+                        <input type="time" name="hora_inicio" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hora Fin</label>
+                        <input type="time" name="hora_fin" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Bloquear Fechas -->
+<div class="modal fade" id="modalBloquearFechas" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bloquear Fechas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.bloquear_fechas') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y Hora Inicio</label>
+                        <input type="datetime-local" name="fecha_inicio" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y Hora Fin</label>
+                        <input type="datetime-local" name="fecha_fin" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo (opcional)</label>
+                        <input type="text" name="motivo" class="form-control" 
+                               placeholder="Ej: Vacaciones, evento personal, etc.">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Bloquear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

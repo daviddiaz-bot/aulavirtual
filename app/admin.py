@@ -7,9 +7,10 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_required, current_user
 from functools import wraps
-from .models import Usuario, Docente, Clase, Pago, Resena, Material, Notificacion, Retiro, db
+from .models import Usuario, Docente, Clase, Pago, Resena, Material, Notificacion, Retiro, DisponibilidadDocente, BloqueNoDisponible, db
 from sqlalchemy import func, extract
 from datetime import datetime, timedelta
+import uuid
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -284,6 +285,116 @@ def clases():
     )
     
     return render_template('admin/clases.html', clases=clases)
+
+
+@admin_bp.route('/clases/crear', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def crear_clase_especial():
+    """Crear clase especial sin costo para alumno (cortesía)"""
+    if request.method == 'POST':
+        try:
+            cliente_id = int(request.form.get('cliente_id'))
+            docente_id = int(request.form.get('docente_id'))
+            titulo = request.form.get('titulo', '').strip()
+            descripcion = request.form.get('descripcion', '').strip()
+            fecha_str = request.form.get('fecha')
+            hora_str = request.form.get('hora')
+            duracion = int(request.form.get('duracion', 60))
+            es_gratuita = request.form.get('es_gratuita') == 'on'
+            acceso_unico = request.form.get('acceso_unico') == 'on'
+            regenerar_link = request.form.get('regenerar_link') == 'on'
+            notas_admin = request.form.get('notas_admin', '').strip()
+            
+            # Validar
+            cliente = Usuario.query.get(cliente_id)
+            docente = Docente.query.get(docente_id)
+            
+            if not cliente or cliente.rol != 'cliente':
+                flash('Cliente inválido', 'danger')
+                return redirect(url_for('admin.crear_clase_especial'))
+            
+            if not docente:
+                flash('Docente inválido', 'danger')
+                return redirect(url_for('admin.crear_clase_especial'))
+            
+            # Crear fecha
+            fecha_inicio = datetime.strptime(f'{fecha_str} {hora_str}', '%Y-%m-%d %H:%M')
+            fecha_fin = fecha_inicio + timedelta(minutes=duracion)
+            
+            if fecha_inicio < datetime.utcnow():
+                flash('No puedes crear clases en el pasado', 'danger')
+                return redirect(url_for('admin.crear_clase_especial'))
+            
+            # Verificar disponibilidad del docente
+            disponible, mensaje = docente.esta_disponible(fecha_inicio, fecha_fin)
+            if not disponible:
+                flash(f'Advertencia: El docente no está disponible - {mensaje}. Puedes continuar de todas formas.', 'warning')
+            
+            # Calcular monto (aunque sea gratuita, guardamos el valor real)
+            monto = 0 if es_gratuita else (duracion / 60) * docente.precio_hora
+            
+            # Crear clase
+            clase = Clase(
+                cliente_id=cliente_id,
+                docente_id=docente_id,
+                titulo=titulo or f'Clase especial de {docente.especialidad}',
+                descripcion=descripcion,
+                fecha_inicio=fecha_inicio,
+                fecha_fin=fecha_fin,
+                duracion_minutos=duracion,
+                monto=monto,
+                estado='confirmada',  # Las clases especiales se confirman automáticamente
+                estado_pago=True if es_gratuita else False,  # Si es gratuita, marcar como pagada
+                es_gratuita=es_gratuita,
+                creada_por_admin=True,
+                acceso_unico=acceso_unico,
+                regenerar_link=regenerar_link,
+                notas_admin=notas_admin
+            )
+            
+            db.session.add(clase)
+            db.session.commit()
+            
+            # Generar link inicial de Jitsi
+            clase.generar_nuevo_link_jitsi()
+            
+            # Crear notificaciones
+            # Notificar al estudiante
+            notif_estudiante = Notificacion(
+                usuario_id=cliente_id,
+                tipo='clase',
+                titulo='Nueva clase programada',
+                mensaje=f'El administrador ha programado una clase {"gratuita " if es_gratuita else ""}para ti el {fecha_inicio.strftime("%d/%m/%Y a las %H:%M")}',
+                url=url_for('main.detalle_clase', clase_id=clase.id)
+            )
+            db.session.add(notif_estudiante)
+            
+            # Notificar al docente
+            notif_docente = Notificacion(
+                usuario_id=docente.usuario_id,
+                tipo='clase',
+                titulo='Nueva clase asignada',
+                mensaje=f'El administrador ha programado una clase para ti el {fecha_inicio.strftime("%d/%m/%Y a las %H:%M")}',
+                url=url_for('main.detalle_clase', clase_id=clase.id)
+            )
+            db.session.add(notif_docente)
+            
+            db.session.commit()
+            
+            flash(f'Clase {"gratuita " if es_gratuita else ""}creada exitosamente', 'success')
+            return redirect(url_for('admin.clases'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear la clase: {str(e)}', 'danger')
+            current_app.logger.error(f'Error creando clase especial: {e}')
+    
+    # GET - Mostrar formulario
+    clientes = Usuario.query.filter_by(rol='cliente', activo=True).order_by(Usuario.nombre).all()
+    docentes = Docente.query.filter_by(verificado=True).order_by(Docente.id).all()
+    
+    return render_template('admin/crear_clase.html', clientes=clientes, docentes=docentes)
 
 
 @admin_bp.route('/pagos')

@@ -52,11 +52,27 @@
                         <strong>Pago Confirmado</strong> - La clase está confirmada
                     </div>
                     
+                    {% if clase.es_gratuita %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-gift me-2"></i>Esta es una clase gratuita (cortesía)
+                    </div>
+                    {% endif %}
+                    
                     {% if clase.link_jitsi and clase.estado == 'confirmada' %}
                     <div class="d-grid mb-3">
-                        <a href="{{ clase.link_jitsi }}" target="_blank" class="btn btn-success btn-lg">
+                        <a href="{{ url_for('main.unirse_clase', clase_id=clase.id) }}" class="btn btn-success btn-lg">
                             <i class="fas fa-video me-2"></i>Unirse a la Videollamada
                         </a>
+                        {% if clase.acceso_unico %}
+                        <p class="text-muted text-center mt-2 mb-0">
+                            <small><i class="fas fa-info-circle me-1"></i>Acceso único: Solo podrás conectarte una vez</small>
+                        </p>
+                        {% endif %}
+                        {% if clase.clase_cerrada %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-lock me-2"></i>Esta clase ha sido cerrada
+                        </div>
+                        {% endif %}
                     </div>
                     {% endif %}
                     {% else %}

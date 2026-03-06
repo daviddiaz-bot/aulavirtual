@@ -9,6 +9,11 @@
     <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="{{ url_for('admin.crear_clase_especial') }}" class="btn btn-success">
+                    <i class="fas fa-plus-circle me-2"></i>Crear Clase Especial
+                </a>
+            </div>
             <form method="get" class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Filtrar por estado:</label>
@@ -53,20 +58,20 @@
                         <tr>
                             <td>{{ clase.id }}</td>
                             <td>
-                                {{ clase.estudiante.nombre }} {{ clase.estudiante.apellido }}<br>
-                                <small class="text-muted">{{ clase.estudiante.email }}</small>
+                                {{ clase.cliente.nombre }}<br>
+                                <small class="text-muted">{{ clase.cliente.email }}</small>
                             </td>
                             <td>
-                                {{ clase.docente.usuario.nombre }} {{ clase.docente.usuario.apellido }}<br>
-                                <small class="text-muted">{{ clase.docente.usuario.email }}</small>
+                                {{ clase.docente_rel.usuario.nombre }}<br>
+                                <small class="text-muted">{{ clase.docente_rel.usuario.email }}</small>
                             </td>
-                            <td>{{ clase.materia }}</td>
+                            <td>{{ clase.titulo }}</td>
                             <td>
                                 {{ clase.fecha_inicio.strftime('%d/%m/%Y') }}<br>
-                                <small class="text-muted">{{ clase.fecha_inicio.strftime('%H:%M') }} - {{ clase.fecha_fin.strftime('%H:%M') }}</small>
+                                <small class="text-muted">{{ clase.fecha_inicio.strftime('%H:%M') }} - {{ clase.fecha_fin.strftime('%H:%M') if clase.fecha_fin }}</small>
                             </td>
-                            <td>{{ clase.duracion }} hora{% if clase.duracion != 1 %}s{% endif %}</td>
-                            <td>${{ "%.2f"|format(clase.monto_total) }}</td>
+                            <td>{{ clase.duracion_minutos }} min</td>
+                            <td>${{ "%.2f"|format(clase.monto) }}</td>
                             <td>
                                 {% if clase.estado == 'pendiente' %}
                                     <span class="badge bg-warning">Pendiente</span>
@@ -79,7 +84,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <small class="text-muted">{{ clase.fecha_reserva.strftime('%d/%m/%Y %H:%M') if clase.fecha_reserva else '-' }}</small>
+                                <small class="text-muted">{{ clase.fecha_creacion.strftime('%d/%m/%Y %H:%M') if clase.fecha_creacion else '-' }}</small>
                             </td>
                         </tr>
                         {% else %}

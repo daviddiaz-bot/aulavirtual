@@ -176,8 +176,107 @@ class Docente(db.Model):
         
         return round(pendiente * 0.85, 2)
     
+    def esta_disponible(self, fecha_inicio, fecha_fin):
+        """Verifica si el docente está disponible en un rango de fecha/hora"""
+        # Verificar si hay una clase confirmada que se solape
+        clases_solapadas = Clase.query.filter(
+            Clase.docente_id == self.id,
+            Clase.estado.in_(['pendiente', 'confirmada']),
+            db.or_(
+                db.and_(Clase.fecha_inicio <= fecha_inicio, Clase.fecha_fin > fecha_inicio),
+                db.and_(Clase.fecha_inicio < fecha_fin, Clase.fecha_fin >= fecha_fin),
+                db.and_(Clase.fecha_inicio >= fecha_inicio, Clase.fecha_fin <= fecha_fin)
+            )
+        ).first()
+        
+        if clases_solapadas:
+            return False, 'Ya tienes una clase programada en ese horario'
+        
+        # Verificar disponibilidad semanal
+        disponibilidades = DisponibilidadDocente.query.filter_by(
+            docente_id=self.id,
+            activo=True
+        ).all()
+        
+        # Si no tiene disponibilidades definidas, asumimos que está disponible
+        if disponibilidades:
+            tiene_disponibilidad = False
+            for disp in disponibilidades:
+                if disp.esta_disponible_en(fecha_inicio):
+                    tiene_disponibilidad = True
+                    break
+            
+            if not tiene_disponibilidad:
+                return False, 'Este horario no está en tu disponibilidad configurada'
+        
+        # Verificar bloques no disponibles
+        bloques = BloqueNoDisponible.query.filter_by(docente_id=self.id).all()
+        for bloque in bloques:
+            if bloque.incluye_fecha(fecha_inicio):
+                motivo = f'No disponible: {bloque.motivo}' if bloque.motivo else 'No disponible en esa fecha'
+                return False, motivo
+        
+        return True, 'Disponible'
+    
     def __repr__(self):
         return f'<Docente {self.usuario.nombre}>'
+
+
+class DisponibilidadDocente(db.Model):
+    """Modelo de Disponibilidad Horaria del Docente"""
+    
+    __tablename__ = 'disponibilidad_docente'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    docente_id = db.Column(db.Integer, db.ForeignKey('docentes.id'), nullable=False)
+    dia_semana = db.Column(db.Integer, nullable=False)  # 0=Lunes, 1=Martes... 6=Domingo
+    hora_inicio = db.Column(db.Time, nullable=False)
+    hora_fin = db.Column(db.Time, nullable=False)
+    activo = db.Column(db.Boolean, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación
+    docente_rel = db.relationship('Docente', backref='disponibilidades')
+    
+    def esta_disponible_en(self, fecha_hora):
+        """Verifica si el docente está disponible en una fecha/hora específica"""
+        if not self.activo:
+            return False
+        
+        # Verificar día de la semana (Python usa 0=Lunes)
+        if fecha_hora.weekday() != self.dia_semana:
+            return False
+        
+        # Verificar hora
+        hora = fecha_hora.time()
+        return self.hora_inicio <= hora <= self.hora_fin
+    
+    def __repr__(self):
+        dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        return f'<Disponibilidad {dias[self.dia_semana]} {self.hora_inicio}-{self.hora_fin}>'
+
+
+class BloqueNoDisponible(db.Model):
+    """Modelo para bloquear fechas/horas específicas (vacaciones, eventos personales, etc.)"""
+    
+    __tablename__ = 'bloques_no_disponibles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    docente_id = db.Column(db.Integer, db.ForeignKey('docentes.id'), nullable=False)
+    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    fecha_fin = db.Column(db.DateTime, nullable=False)
+    motivo = db.Column(db.String(200))
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación
+    docente_rel = db.relationship('Docente', backref='bloques_no_disponibles')
+    
+    def incluye_fecha(self, fecha_hora):
+        """Verifica si una fecha/hora está bloqueada"""
+        return self.fecha_inicio <= fecha_hora <= self.fecha_fin
+    
+    def __repr__(self):
+        return f'<BloqueNoDisponible {self.fecha_inicio} - {self.fecha_fin}>'
 
 
 class Clase(db.Model):
@@ -202,11 +301,108 @@ class Clase(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
     fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Control de acceso y sesión
+    clase_cerrada = db.Column(db.Boolean, default=False)  # Si la clase fue cerrada automáticamente
+    fecha_cierre = db.Column(db.DateTime)  # Fecha de cierre de la clase
+    acceso_unico = db.Column(db.Boolean, default=True)  # Si solo se permite una conexión por persona
+    conexiones_estudiante = db.Column(db.Integer, default=0)  # Número de veces que el estudiante se conectó
+    conexiones_docente = db.Column(db.Integer, default=0)  # Número de veces que el docente se conectó
+    primera_conexion_estudiante = db.Column(db.DateTime)  # Primera conexión del estudiante
+    primera_conexion_docente = db.Column(db.DateTime)  # Primera conexión del docente
+    
+    # Clases especiales
+    es_gratuita = db.Column(db.Boolean, default=False)  # Si es una clase sin costo (cortesía del admin)
+    creada_por_admin = db.Column(db.Boolean, default=False)  # Si fue creada directamente por administrador
+    notas_admin = db.Column(db.Text)  # Notas del administrador sobre la clase
+    
+    # Seguridad de enlaces
+    regenerar_link = db.Column(db.Boolean, default=True)  # Si se debe regenerar el link en cada acceso
+    link_jitsi_usado = db.Column(db.Boolean, default=False)  # Si el link actual ya fue usado
+    
     # Relaciones
     pago = db.relationship('Pago', backref='clase', uselist=False)
     resena = db.relationship('Resena', backref='clase', uselist=False)
     materiales = db.relationship('Material', backref='clase', lazy='dynamic')
     asistencias = db.relationship('Asistencia', backref='clase', lazy='dynamic')
+    
+    def puede_acceder(self, usuario_id, es_docente=False):
+        """Verifica si un usuario puede acceder a la clase"""
+        # Si la clase está cerrada, no se puede acceder
+        if self.clase_cerrada:
+            return False, 'La clase ha sido cerrada'
+        
+        # Verificar si la clase ha pasado su tiempo límite
+        ahora = datetime.utcnow()
+        if self.fecha_fin and ahora > self.fecha_fin:
+            return False, 'La clase ha finalizado'
+        
+        # Verificar si ya se usó el acceso único
+        if self.acceso_unico:
+            if es_docente and self.conexiones_docente > 0:
+                return False, 'Ya has utilizado tu acceso único a esta clase'
+            elif not es_docente and self.conexiones_estudiante > 0:
+                return False, 'Ya has utilizado tu acceso único a esta clase'
+        
+        # Verificar que la clase esté confirmada
+        if self.estado not in ['confirmada', 'completada']:
+            return False, 'La clase no está confirmada'
+        
+        return True, 'Acceso permitido'
+    
+    def generar_nuevo_link_jitsi(self, commit=True):
+        """Genera un nuevo enlace de Jitsi Meet para la clase"""
+        import uuid
+        from flask import current_app
+        
+        jitsi_server = current_app.config.get('JITSI_SERVER', 'meet.jit.si')
+        # Generar ID único con timestamp para evitar colisiones
+        timestamp = int(datetime.utcnow().timestamp())
+        unique_id = f"{self.id}-{timestamp}-{uuid.uuid4().hex[:8]}"
+        self.link_jitsi = f"https://{jitsi_server}/aulavirtual-{unique_id}"
+        self.link_jitsi_usado = False
+        
+        if commit:
+            db.session.commit()
+        
+        return self.link_jitsi
+    
+    def registrar_acceso(self, usuario_id, es_docente=False, regenerar=None):
+        """Registra un acceso del usuario a la clase"""
+        ahora = datetime.utcnow()
+        
+        if es_docente:
+            if not self.primera_conexion_docente:
+                self.primera_conexion_docente = ahora
+            self.conexiones_docente += 1
+        else:
+            if not self.primera_conexion_estudiante:
+                self.primera_conexion_estudiante = ahora
+            self.conexiones_estudiante += 1
+        
+        # Determinar si debe regenerar
+        if regenerar is None:
+            regenerar = self.regenerar_link
+        
+        # Regenerar link si está configurado Y ambos ya se conectaron al menos una vez
+        if regenerar and self.conexiones_docente > 0 and self.conexiones_estudiante > 0:
+            # El link actual fue usado, generar uno nuevo
+            self.generar_nuevo_link_jitsi(commit=False)
+        else:
+            # Solo marcar el link actual como usado
+            self.link_jitsi_usado = True
+        
+        db.session.commit()
+    
+    def cerrar_automaticamente(self):
+        """Cierra automáticamente la clase después del tiempo establecido"""
+        if not self.clase_cerrada and self.fecha_fin and datetime.utcnow() > self.fecha_fin:
+            self.clase_cerrada = True
+            self.fecha_cierre = datetime.utcnow()
+            if self.estado == 'confirmada':
+                self.estado = 'completada'
+            db.session.commit()
+            return True
+        return False
     
     def __repr__(self):
         return f'<Clase {self.id} - {self.titulo}>'

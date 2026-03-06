@@ -331,3 +331,36 @@ def reset_password(token):
 def forgot_password():
     """Alias para recuperar_password"""
     return recuperar_password()
+
+
+@auth_bp.route('/cambiar-password', methods=['POST'])
+@login_required
+def cambiar_password():
+    """Cambiar contraseña de usuario logueado"""
+    password_actual = request.form.get('password_actual', '')
+    password_nueva = request.form.get('password_nueva', '')
+    password_confirmar = request.form.get('password_confirmar', '')
+    
+    # Validaciones
+    if not all([password_actual, password_nueva, password_confirmar]):
+        flash('Todos los campos son obligatorios', 'danger')
+        return redirect(url_for('main.perfil'))
+    
+    if not current_user.check_password(password_actual):
+        flash('La contraseña actual es incorrecta', 'danger')
+        return redirect(url_for('main.perfil'))
+    
+    if len(password_nueva) < 8:
+        flash('La nueva contraseña debe tener al menos 8 caracteres', 'danger')
+        return redirect(url_for('main.perfil'))
+    
+    if password_nueva != password_confirmar:
+        flash('Las contraseñas nuevas no coinciden', 'danger')
+        return redirect(url_for('main.perfil'))
+    
+    # Actualizar contraseña
+    current_user.set_password(password_nueva)
+    db.session.commit()
+    
+    flash('Contraseña actualizada correctamente', 'success')
+    return redirect(url_for('main.perfil'))

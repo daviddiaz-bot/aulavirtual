@@ -87,8 +87,8 @@
                             <td>
                                 <a href="{{ url_for('main.detalle_clase', clase_id=clase.id) }}" 
                                    class="btn btn-sm btn-outline-primary">Ver</a>
-                                {% if clase.estado_pago %}
-                                <a href="{{ clase.link_jitsi }}" target="_blank" 
+                                {% if clase.estado_pago and not clase.clase_cerrada %}
+                                <a href="{{ url_for('main.unirse_clase', clase_id=clase.id) }}" 
                                    class="btn btn-sm btn-success">
                                     <i class="fas fa-video me-1"></i>Iniciar
                                 </a>
