@@ -107,11 +107,13 @@
 
         <!-- Información del Docente -->
         <div class="col-md-4">
+            {% if material.docente %}
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Docente</h5>
                 </div>
                 <div class="card-body">
+                    {% if material.docente.usuario %}
                     <div class="text-center mb-3">
                         {% if material.docente.usuario.avatar_url %}
                         <img src="{{ material.docente.usuario.avatar_url }}" 
@@ -128,10 +130,10 @@
                     <p><strong>Especialidad:</strong><br>{{ material.docente.especialidad or 'No especificada' }}</p>
                     <p><strong>Calificación:</strong><br>
                         <span class="badge bg-warning">
-                            <i class="fas fa-star"></i> {{ "%.1f"|format(material.docente.promedio_calificacion) }}
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(material.docente.promedio_calificacion or 0.0) }}
                         </span>
                     </p>
-                    <p><strong>Total Clases:</strong> {{ material.docente.total_clases }}</p>
+                    <p><strong>Total Clases:</strong> {{ material.docente.total_clases or 0 }}</p>
                     <p><strong>Verificado:</strong>
                         {% if material.docente.verificado %}
                         <span class="badge bg-success">Sí</span>
@@ -141,8 +143,21 @@
                     </p>
                     <a href="{{ url_for('admin.detalle_usuario', user_id=material.docente.usuario_id) }}" 
                        class="btn btn-sm btn-outline-primary w-100">Ver Perfil Completo</a>
+                    {% else %}
+                    <p class="text-muted">Información de usuario no disponible</p>
+                    {% endif %}
                 </div>
             </div>
+            {% else %}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Docente</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Información de docente no disponible</p>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Acciones -->
             <div class="card">
