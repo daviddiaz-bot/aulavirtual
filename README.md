@@ -2,10 +2,14 @@
 
 ![Aula Virtual](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-green.svg)
-![Flask](https://img.shields.io/badge/flask-2.3.3-lightgrey.svg)
+![Flask](https://img.shields.io/badge/flask-2.3+-lightgrey.svg)
+![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Status](https://img.shields.io/badge/status-production-success.svg)
 
 **Aula Virtual** es una plataforma completa de gestión educativa que conecta estudiantes con docentes profesionales para clases personalizadas en tiempo real.
+
+🔴 **Estado Actual**: Sistema desplegado en producción en servidor 192.168.1.6 con 5 containers Docker, PostgreSQL 15, Redis 7, y Nginx 1.25.
 
 ---
 
@@ -13,11 +17,11 @@
 
 - [Características Principales](#-características-principales)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [Estado del Despliegue](#-estado-del-despliegue)
 - [Instalación Rápida](#-instalación-rápida)
-- [Instalación Completa](#-instalación-completa)
-- [Despliegue en Producción](#-despliegue-en-producción)
-- [Documentación Completa](#-documentación-completa)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [[Sistema de Calificaciones y Reseñas](#-sistema-de-calificaciones-y-reseñas)
+- Calificación de docentes (1-5 estrellas)
+- Comentarios y feedback
 
 ---
 
