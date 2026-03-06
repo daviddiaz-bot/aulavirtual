@@ -43,8 +43,8 @@
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Email</th>
-                            <th>Materias</th>
-                            <th>Tarifa/Hora</th>
+                            <th>Especialidad</th>
+                            <th>Precio/Hora</th>
                             <th>Verificado</th>
                             <th>Fecha Registro</th>
                             <th>Acciones</th>
@@ -57,13 +57,13 @@
                             <td>{{ docente.usuario.nombre }} {{ docente.usuario.apellido }}</td>
                             <td>{{ docente.usuario.email }}</td>
                             <td>
-                                {% if docente.materias %}
-                                    {{ docente.materias[:50] }}{% if docente.materias|length > 50 %}...{% endif %}
+                                {% if docente.especialidad %}
+                                    {{ docente.especialidad[:50] }}{% if docente.especialidad|length > 50 %}...{% endif %}
                                 {% else %}
-                                    <span class="text-muted">No especificadas</span>
+                                    <span class="text-muted">No especificada</span>
                                 {% endif %}
                             </td>
-                            <td>${{ "%.2f"|format(docente.tarifa_hora) }}</td>
+                            <td>${{ "%.2f"|format(docente.precio_hora) }}</td>
                             <td>
                                 {% if docente.verificado %}
                                     <span class="badge bg-success">Verificado</span>
