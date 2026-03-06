@@ -736,13 +736,26 @@ def descargar_material(material_id):
     material.descargas += 1
     db.session.commit()
     
-    # Enviar archivo
-    filepath = os.path.join('app', 'static', material.archivo_path)
-    if not os.path.exists(filepath):
-        flash('El archivo no existe', 'danger')
-        return redirect(url_for('main.dashboard'))
+    # Construir ruta absoluta del archivo
+    filepath = os.path.join(current_app.root_path, 'static', material.archivo_path)
     
-    return send_file(filepath, as_attachment=True, download_name=f"{material.titulo}.pdf")
+    if not os.path.exists(filepath):
+        current_app.logger.error(f'Archivo no encontrado: {filepath}')
+        flash('El archivo no existe en el servidor', 'danger')
+        return redirect(url_for('admin.materiales') if current_user.rol == 'admin' else url_for('main.dashboard'))
+    
+    try:
+        # Nombre de archivo limpio para descarga
+        download_filename = f"{material.titulo}.pdf"
+        return send_file(filepath, as_attachment=True, download_name=download_filename, mimetype='application/pdf')
+    except Exception as e:
+        current_app.logger.error(f'Error enviando archivo: {e}')
+        # Intenta con el método antiguo de Flask si download_name falla
+        try:
+            return send_file(filepath, as_attachment=True, attachment_filename=download_filename, mimetype='application/pdf')
+        except:
+            # Si ambos fallan, envía sin nombre personalizado
+            return send_file(filepath, as_attachment=True, mimetype='application/pdf')
 
 
 @main.route('/estudiante/materiales')
