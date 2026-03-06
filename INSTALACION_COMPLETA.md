@@ -1,6 +1,6 @@
 # 🚀 GUÍA COMPLETA DE INSTALACIÓN - AULA VIRTUAL
 
-**Versión**: 1.0.0  
+**Versión**: 2.1.0  
 **Sistema Operativo**: Linux (CentOS/RHEL 9, Ubuntu 20.04+)  
 **Última actualización**: Marzo 2026
 

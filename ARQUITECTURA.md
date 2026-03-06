@@ -1,6 +1,6 @@
 # 🏗️ ARQUITECTURA DE AULA VIRTUAL
 
-**Versión**: 1.0.0  
+**Versión**: 2.1.0  
 **Fecha**: Marzo 2026  
 **Tipo**: Aplicación Web con Arquitectura de Microservicios
 
@@ -768,7 +768,7 @@ systemctl status docker
 ---
 
 **Última actualización**: 6 de Marzo 2026  
-**Versión**: 1.0.0  
+**Versión**: 2.1.0  
 **Maintainer**: David Diaz (davideduardo2010@gmail.com)
 
 3. **Procesamiento de Pagos**:

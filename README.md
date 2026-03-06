@@ -1,27 +1,27 @@
 # 🎓 Aula Virtual - Sistema de Gestión Educativa
 
-![Aula Virtual](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Aula Virtual](https://img.shields.io/badge/version-2.1.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-green.svg)
-![Flask](https://img.shields.io/badge/flask-2.3+-lightgrey.svg)
+![Flask](https://img.shields.io/badge/flask-3.0-lightgrey.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Status](https://img.shields.io/badge/status-production-success.svg)
 
 **Aula Virtual** es una plataforma completa de gestión educativa que conecta estudiantes con docentes profesionales para clases personalizadas en tiempo real.
 
-🔴 **Estado Actual**: Sistema desplegado en producción en servidor 192.168.1.6 con 5 containers Docker, PostgreSQL 15, Redis 7, y Nginx 1.25.
+🟢 **Estado Actual**: Sistema desplegado en producción en servidor 192.168.1.6 con Docker Compose, PostgreSQL 15, Redis 7, Nginx 1.25, y Jitsi Meet integrado.
 
 ---
 
 ## 📋 Tabla de Contenidos
 
 - [Características Principales](#-características-principales)
+- [Novedades v2.1.0](#-novedades-v210)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
 - [Estado del Despliegue](#-estado-del-despliegue)
 - [Instalación Rápida](#-instalación-rápida)
-- [[Sistema de Calificaciones y Reseñas](#-sistema-de-calificaciones-y-reseñas)
-- Calificación de docentes (1-5 estrellas)
-- Comentarios y feedback
+- [Documentación](#-documentación)
+- [Contribuir](#-contribuir)
 
 ---
 
@@ -32,22 +32,48 @@
 - Autenticación de dos factores (2FA) con TOTP
 - Recuperación de contraseña
 - Gestión de sesiones seguras
+- CSRF Protection
 
 ✅ **Tres Roles de Usuario**
-- **Administradores**: Panel completo de gestión
-- **Docentes**: Gestión de clases y materiales
+- **Administradores**: Panel completo de gestión + clases especiales
+- **Docentes**: Gestión de clases, materiales y disponibilidad horaria
 - **Estudiantes**: Reserva y seguimiento de clases
 
-✅ **Gestión de Clases**
+✅ **Sistema de Disponibilidad Horaria** 🆕
+- Docentes definen horarios recurrentes semanales
+- Bloqueo de fechas específicas (vacaciones, eventos)
+- Validación automática de reservas según disponibilidad
+- Interfaz visual de calendario
+
+✅ **Gestión Avanzada de Clases**
 - Reserva de clases con docentes
 - Videoconferencias integradas con Jitsi Meet
+- **Control de acceso temporal**: Clases disponibles 15 min antes 🆕
+- **Acceso único con seguridad mejorada** 🆕
 - Calendario de clases
 - Historial y seguimiento
+- Cierre automático al finalizar
+
+✅ **Clases Especiales para Administradores** 🆕
+- Creación de clases gratuitas
+- Configuración flexible de seguridad
+- Notas administrativas internas
 
 ✅ **Sistema de Pagos**
 - Integración con Stripe
 - Pagos seguros con tarjeta
 - Webhooks para confirmación automática
+- Gestión de transacciones
+
+✅ **Gestión de Materiales**
+- Subida de archivos (PDF, DOCX, etc.)
+- Compartir con estudiantes
+- Descarga segura
+
+✅ **Sistema de Notificaciones**
+- Emails de confirmación
+- Recordatorios automáticos
+- Alertas de cambios
 
 ✅ **Sistema de Calificaciones y Reseñas**
 - Calificación de docentes (1-5 estrellas)
@@ -74,6 +100,107 @@
 - Emails automáticos
 - Confirmaciones de reserva
 - Recordatorios de clase
+
+---
+
+## 🆕 Novedades v2.1.0 (6 de Marzo 2026)
+
+### 🌟 Sistema de Disponibilidad Horaria
+
+Los docentes ahora pueden definir su disponibilidad de dos formas:
+
+**1. Disponibilidad Recurrente**
+```
+Ej: Lunes a Viernes de 9:00 a 18:00
+    Sábados de 10:00 a 14:00
+```
+- Se repite automáticamente cada semana
+- Los estudiantes solo pueden reservar en horarios disponibles
+- Configurable desde `/disponibilidad`
+
+**2. Bloqueos Específicos**
+```
+Ej: Bloquear 15-20 de marzo (vacaciones)
+    Bloquear 5 de abril de 14:00 a 16:00 (reunión)
+```
+- Bloquear días completos o rangos horarios
+- Tiene precedencia sobre disponibilidad recurrente
+- Ideal para vacaciones, eventos personales
+
+### 🔒 Control de Acceso Mejorado
+
+**Ventana Temporal de Acceso**:
+- ⏰ Las clases se habilitan **15 minutos antes** del inicio
+- ⏰ Permanecen activas hasta la **hora de fin programada**
+- ⏰ Se cierran automáticamente al finalizar
+
+**Seguridad de Enlaces Jitsi**:
+- 🔐 **Sin enlaces directos**: Todo pasa por endpoint `/clase/<id>/unirse`
+- 🔐 **Validaciones backend**: Verificación de horario, permisos, y estado
+- 🔐 **Acceso único**: Opcionalmente, enlaces de un solo uso
+- 🔐 **Regeneración automática**: Nuevos enlaces después de cada acceso (configurable)
+
+**Seguimiento de Conexiones**:
+```python
+# Cada acceso registra:
+- Timestamp de primera conexión
+- Número de conexiones (estudiante/docente)
+- Estado del enlace (usado/no usado)
+```
+
+### 🎁 Clases Especiales para Admins
+
+Los administradores pueden crear clases con configuración especial:
+
+- ✅ **Clases gratuitas**: Sin costo para el estudiante
+- ✅ **Configuración flexible**: Control sobre acceso único y regeneración
+- ✅ **Notas administrativas**: Documentar el propósito
+- ✅ **Casos de uso**:
+  - Clases de demostración
+  - Reposiciones por problemas técnicos
+  - Cortesías o promocionales
+
+### 📊 Nuevos Modelos de Base de Datos
+
+```sql
+-- Disponibilidad recurrente
+CREATE TABLE disponibilidad_docente (
+    id SERIAL PRIMARY KEY,
+    docente_id INTEGER,
+    dia_semana INTEGER,  -- 0=Domingo, 6=Sábado
+    hora_inicio TIME,
+    hora_fin TIME,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- Bloqueos específicos
+CREATE TABLE bloques_no_disponibles (
+    id SERIAL PRIMARY KEY,
+    docente_id INTEGER,
+    fecha DATE,
+    hora_inicio TIME,  -- NULL = todo el día
+    hora_fin TIME,
+    motivo VARCHAR(200)
+);
+
+-- 12 nuevos campos en 'clases'
+ALTER TABLE clases ADD COLUMN clase_cerrada BOOLEAN DEFAULT FALSE;
+ALTER TABLE clases ADD COLUMN acceso_unico BOOLEAN DEFAULT TRUE;
+ALTER TABLE clases ADD COLUMN conexiones_estudiante INTEGER DEFAULT 0;
+ALTER TABLE clases ADD COLUMN conexiones_docente INTEGER DEFAULT 0;
+ALTER TABLE clases ADD COLUMN es_gratuita BOOLEAN DEFAULT FALSE;
+ALTER TABLE clases ADD COLUMN creada_por_admin BOOLEAN DEFAULT FALSE;
+ALTER TABLE clases ADD COLUMN notas_admin TEXT;
+ALTER TABLE clases ADD COLUMN regenerar_link BOOLEAN DEFAULT TRUE;
+-- ... y 4 más
+```
+
+### 📝 Ver Cambios Completos
+- [CHANGELOG.md](CHANGELOG.md) - Registro detallado de cambios
+- [MANUAL_TECNICO.md](MANUAL_TECNICO.md) - Documentación técnica completa
+- [MANUAL_USUARIO.md](MANUAL_USUARIO.md) - Guía para usuarios finales
+
+---
 
 ## 📋 Requisitos Previos
 
@@ -206,14 +333,27 @@ docker-compose exec web python -c "from app import create_app, db; from app.mode
 
 ## 📚 Documentación
 
-La documentación completa está disponible en formato HTML en la carpeta `/docs`:
+La documentación completa del proyecto está disponible en los siguientes archivos:
 
-- **Manual de Implementación**: Guía paso a paso para desplegar el sistema
-- **Manual de Administración**: Gestión completa del portal
-- **Manual de Usuario**: Guía para estudiantes
-- **Manual de Docentes**: Guía para profesores
+### Documentación Principal
+- **[README.md](README.md)**: Visión general del proyecto, inicio rápido e instalación
+- **[CHANGELOG.md](CHANGELOG.md)**: Historial de cambios, notas de versión y migraciones
+- **[MANUAL_TECNICO.md](MANUAL_TECNICO.md)**: Documentación técnica completa para desarrolladores y administradores de sistemas
+- **[MANUAL_USUARIO.md](MANUAL_USUARIO.md)**: Guías de usuario para docentes, estudiantes y administradores
 
-Para ver los manuales, abre `/docs/index.html` en tu navegador después del despliegue.
+### Guías de Instalación y Configuración
+- **[INICIO_RAPIDO.md](INICIO_RAPIDO.md)**: Guía de inicio rápido para entornos de desarrollo
+- **[INSTALACION_COMPLETA.md](INSTALACION_COMPLETA.md)**: Procedimiento completo de instalación en producción
+- **[ARQUITECTURA.md](ARQUITECTURA.md)**: Arquitectura del sistema y diseño técnico
+
+### Documentación Específica
+- **[JITSI_MEET.md](JITSI_MEET.md)**: Configuración e integración de Jitsi Meet
+- **[MANUAL_MATERIALES_PDF.md](MANUAL_MATERIALES_PDF.md)**: Gestión de materiales y PDFs de clases
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**: Guía de resolución de problemas comunes
+
+### Documentación HTML
+La documentación también está disponible en formato HTML en la carpeta `/docs/`:
+- Abre `/docs/index.html` en tu navegador para acceso interactivo a todos los manuales
 
 ## 🏗️ Arquitectura
 

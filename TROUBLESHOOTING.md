@@ -1,6 +1,6 @@
 # 🔧 TROUBLESHOOTING Y PROBLEMAS RESUELTOS - AULA VIRTUAL
 
-**Versión**: 1.0.0  
+**Versión**: 2.1.0  
 **Última actualización**: 6 de Marzo 2026  
 **Commits incluidos**: ee11efc hasta d5e9f89 (7 commits)
 
