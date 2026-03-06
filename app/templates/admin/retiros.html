@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Retiros - Admin - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-hand-holding-usd me-2"></i>Gestión de Retiros</h1>
+    
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-0">Pendientes</h6>
+                    <h3 class="mt-2">{{ retiros_pendientes|length }}</h3>
+                    <small>${{ "%.2f"|format(sum_pendientes) }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-0">Aprobados</h6>
+                    <h3 class="mt-2">{{ retiros_aprobados|length }}</h3>
+                    <small>${{ "%.2f"|format(sum_aprobados) }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-0">Pagados (mes)</h6>
+                    <h3 class="mt-2">{{ retiros_pagados_mes|length }}</h3>
+                    <small>${{ "%.2f"|format(sum_pagados_mes) }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-0">Rechazados (mes)</h6>
+                    <h3 class="mt-2">{{ retiros_rechazados|length }}</h3>
+                    <small>Este mes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabla de Retiros -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Solicitudes de Retiro ({{ retiros.total }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Docente</th>
+                            <th>Monto</th>
+                            <th>Método</th>
+                            <th>Estado</th>
+                            <th>Fecha Solicitud</th>
+                            <th>Fecha Proceso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for retiro in retiros.items %}
+                        <tr>
+                            <td>{{ retiro.id }}</td>
+                            <td>
+                                {{ retiro.docente.usuario.nombre }} {{ retiro.docente.usuario.apellido }}<br>
+                                <small class="text-muted">{{ retiro.docente.usuario.email }}</small>
+                            </td>
+                            <td><strong>${{ "%.2f"|format(retiro.monto) }}</strong></td>
+                            <td>
+                                {% if retiro.metodo_retiro == 'transferencia' %}
+                                    <span class="badge bg-primary">Transferencia</span>
+                                {% elif retiro.metodo_retiro == 'paypal' %}
+                                    <span class="badge bg-info">PayPal</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ retiro.metodo_retiro|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if retiro.estado == 'pendiente' %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% elif retiro.estado == 'aprobado' %}
+                                    <span class="badge bg-info">Aprobado</span>
+                                {% elif retiro.estado == 'pagado' %}
+                                    <span class="badge bg-success">Pagado</span>
+                                {% elif retiro.estado == 'rechazado' %}
+                                    <span class="badge bg-danger">Rechazado</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ retiro.fecha_solicitud.strftime('%d/%m/%Y %H:%M') if retiro.fecha_solicitud else '-' }}</td>
+                            <td>{{ retiro.fecha_procesado.strftime('%d/%m/%Y %H:%M') if retiro.fecha_procesado else '-' }}</td>
+                            <td>
+                                {% if retiro.estado == 'pendiente' %}
+                                <form method="post" action="{{ url_for('admin.procesar_retiro', retiro_id=retiro.id) }}" style="display: inline;">
+                                    <input type="hidden" name="accion" value="aprobar">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Aprobar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{{ url_for('admin.procesar_retiro', retiro_id=retiro.id) }}" style="display: inline;">
+                                    <input type="hidden" name="accion" value="rechazar">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Rechazar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                {% elif retiro.estado == 'aprobado' %}
+                                <form method="post" action="{{ url_for('admin.procesar_retiro', retiro_id=retiro.id) }}" style="display: inline;">
+                                    <input type="hidden" name="accion" value="pagado">
+                                    <button type="submit" class="btn btn-sm btn-primary" title="Marcar como pagado">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No se encontraron retiros</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            {% if retiros.pages > 1 %}
+            <nav aria-label="Paginación">
+                <ul class="pagination justify-content-center mt-3">
+                    {% if retiros.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.retiros', page=retiros.prev_num, **request.args) }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in retiros.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == retiros.page %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('admin.retiros', page=page_num, **request.args) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if retiros.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.retiros', page=retiros.next_num, **request.args) }}">Siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

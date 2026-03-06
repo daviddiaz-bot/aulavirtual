@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes y Estadísticas - Admin - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Reportes y Estadísticas</h1>
+    
+    <!-- Filtro de Fechas -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Fecha Desde:</label>
+                    <input type="date" name="desde" class="form-control" value="{{ fecha_desde.strftime('%Y-%m-%d') if fecha_desde }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha Hasta:</label>
+                    <input type="date" name="hasta" class="form-control" value="{{ fecha_hasta.strftime('%Y-%m-%d') if fecha_hasta }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter me-1"></i>Filtrar</button>
+                    <a href="{{ url_for('admin.reportes') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Ingresos Totales</h6>
+                            <h2 class="mt-2">${{ "%.2f"|format(ingresos) }}</h2>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Clases</h6>
+                            <h2 class="mt-2">{{ total_clases }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-check fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Nuevos Usuarios</h6>
+                            <h2 class="mt-2">{{ nuevos_usuarios }}</h2>
+                        </div>
+                        <i class="fas fa-user-plus fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Docentes -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Top 10 Docentes por Ingresos</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Docente</th>
+                            <th>Email</th>
+                            <th>Total Clases</th>
+                            <th>Ingresos Generados</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for docente, total_ingresos, total_clases in top_docentes %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ docente.usuario.nombre }} {{ docente.usuario.apellido }}</td>
+                            <td>{{ docente.usuario.email }}</td>
+                            <td>{{ total_clases }}</td>
+                            <td><strong>${{ "%.2f"|format(total_ingresos) }}</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No hay datos disponibles en el período seleccionado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

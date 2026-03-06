@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - Admin - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-cog me-2"></i>Configuración del Sistema</h1>
+    
+    <!-- Configuración de Stripe -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fab fa-stripe me-2"></i>Configuración de Stripe</h5>
+        </div>
+        <div class="card-body">
+            {% if stripe_configured %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>Stripe está configurado en modo: <strong>{{ stripe_mode|upper }}</strong>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Stripe no está completamente configurado
+            </div>
+            {% endif %}
+            
+            <form method="post" action="{{ url_for('admin.actualizar_configuracion') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Publishable Key:</label>
+                        <input type="text" name="stripe_publishable_key" class="form-control font-monospace" 
+                               value="{{ stripe_publishable_key or '' }}" 
+                               placeholder="pk_test_... o pk_live_...">
+                        <small class="text-muted">Clave pública de Stripe (comienza con pk_)</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Secret Key:</label>
+                        <input type="password" name="stripe_secret_key" class="form-control font-monospace" 
+                               value="{{ stripe_secret_key_masked or '' }}" 
+                               placeholder="sk_test_... o sk_live_...">
+                        <small class="text-muted">{% if stripe_secret_key_masked %}Configurada ({{ stripe_secret_key_masked }}){% else %}No configurada{% endif %}</small>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Webhook Secret:</label>
+                    <input type="password" name="stripe_webhook_secret" class="form-control font-monospace" 
+                           value="{{ stripe_webhook_secret_masked or '' }}" 
+                           placeholder="whsec_...">
+                    <small class="text-muted">{% if stripe_webhook_secret_masked %}Configurado ({{ stripe_webhook_secret_masked }}){% else %}No configurado{% endif %}</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Guardar Configuración
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Configuración de Jitsi -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-video me-2"></i>Configuración de Jitsi Meet</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Servidor Jitsi actual: <strong>{{ jitsi_server }}</strong>
+            </div>
+            <p class="text-muted">
+                Las videollamadas se realizan a través de Jitsi Meet. 
+                Actualmente usando el servidor público: {{ jitsi_server }}
+            </p>
+            <p class="text-muted">
+                Para configurar un servidor propio de Jitsi, modifica la variable de entorno <code>JITSI_SERVER</code> en el archivo de configuración.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Información del Sistema -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Sistema</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Versión:</dt>
+                <dd class="col-sm-9">Aula Virtual 1.0</dd>
+                
+                <dt class="col-sm-3">Base de Datos:</dt>
+                <dd class="col-sm-9">PostgreSQL</dd>
+                
+                <dt class="col-sm-3">Servidor Web:</dt>
+                <dd class="col-sm-9">Gunicorn + Nginx</dd>
+                
+                <dt class="col-sm-3">Framework:</dt>
+                <dd class="col-sm-9">Flask 2.3+</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}
