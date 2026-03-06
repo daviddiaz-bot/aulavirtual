@@ -141,7 +141,7 @@
                         <span class="badge bg-warning">No</span>
                         {% endif %}
                     </p>
-                    <a href="{{ url_for('admin.detalle_usuario', user_id=material.docente.usuario_id) }}" 
+                    <a href="{{ url_for('admin.detalle_usuario', usuario_id=material.docente.usuario_id) }}" 
                        class="btn btn-sm btn-outline-primary w-100">Ver Perfil Completo</a>
                     {% else %}
                     <p class="text-muted">Información de usuario no disponible</p>
