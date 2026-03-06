@@ -14,48 +14,44 @@
     <!-- Información de límites -->
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        <strong>Límites:</strong> Puedes subir hasta {{ max_archivos }} archivos PDF. 
-        Tamaño máximo por archivo: 3 MB. 
-        Actualmente tienes <strong>{{ materiales|length }}</strong> de {{ max_archivos }} archivos.
+        <strong>Límites:</strong> Puedes subir hasta 5 archivos PDF. 
+        Tamaño máximo por archivo: 5 MB. 
+        Actualmente tienes <strong>{{ total_materiales }}</strong> de 5 archivos.
     </div>
 
     <!-- Formulario de subida -->
-    {% if materiales|length < max_archivos %}
+    {% if puede_subir %}
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Subir Nuevo PDF</h5>
         </div>
         <div class="card-body">
-            <form id="formSubirPDF" enctype="multipart/form-data">
+            <form method="POST" action="{{ url_for('main.subir_material_docente') }}" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="titulo" class="form-label">Título del Material *</label>
-                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required maxlength="200">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="archivo" class="form-label">Archivo PDF * (Máx. 3 MB)</label>
+                        <label for="archivo" class="form-label">Archivo PDF * (Máx. 5 MB)</label>
                         <input type="file" class="form-control" id="archivo" name="archivo" accept=".pdf" required>
+                        <small class="form-text text-muted">Solo archivos PDF, máximo 5 MB</small>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label for="descripcion" class="form-label">Descripción (Opcional)</label>
-                    <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="2" maxlength="500"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" id="btnSubir">
                     <i class="fas fa-upload me-1"></i>Subir PDF
                 </button>
-                <div id="progressBar" class="mt-3" style="display: none;">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
     {% else %}
     <div class="alert alert-warning">
         <i class="fas fa-exclamation-triangle me-2"></i>
-        Has alcanzado el límite máximo de {{ max_archivos }} archivos. Elimina alguno para subir más.
+        Has alcanzado el límite máximo de 5 archivos. Elimina alguno para subir más.
     </div>
     {% endif %}
 
@@ -81,73 +77,122 @@
                     </thead>
                     <tbody>
                         {% for material in materiales %}
-                        <tr id="material-{{ material.id }}">
+                        <tr>
                             <td>
                                 <i class="fas fa-file-pdf text-danger me-1"></i>
-                                {{ material.titulo }}
+                                <strong>{{ material.titulo }}</strong>
                             </td>
-                            <td>{{ material.descripcion[:50] }}{% if material.descripcion|length > 50 %}...{% endif %}</td>
+                            <td>
+                                {% if material.descripcion %}
+                                    {{ material.descripcion[:50] }}{% if material.descripcion|length > 50 %}...{% endif %}
+                                {% else %}
+                                    <span class="text-muted">Sin descripción</span>
+                                {% endif %}
+                            </td>
                             <td>{{ "%.2f"|format(material.tamanio_kb / 1024) }} MB</td>
                             <td>
                                 <span class="badge bg-info">{{ material.estudiantes_compartidos|length }} estudiante(s)</span>
                             </td>
-                            <td>{{ material.descargas }}</td>
+                            <td><span class="badge bg-secondary">{{ material.descargas }}</span></td>
                             <td>{{ material.fecha_subida.strftime('%d/%m/%Y') }}</td>
                             <td>
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-sm btn-success" 
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#modalCompartir{{ material.id }}">
+                                            data-bs-target="#modalCompartir{{ material.id }}"
+                                            title="Compartir con estudiantes">
                                         <i class="fas fa-share-alt"></i>
                                     </button>
                                     <a href="{{ url_for('main.descargar_material', material_id=material.id) }}" 
-                                       class="btn btn-sm btn-info">
+                                       class="btn btn-sm btn-info"
+                                       title="Descargar">
                                         <i class="fas fa-download"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-danger" 
-                                            onclick="eliminarMaterial({{ material.id }})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form method="POST" action="{{ url_for('main.eliminar_material_docente', material_id=material.id) }}" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('¿Estás seguro de que deseas eliminar este material? Esta acción no se puede deshacer.');">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
 
                         <!-- Modal para compartir -->
                         <div class="modal fade" id="modalCompartir{{ material.id }}" tabindex="-1">
-                            <div class="modal-dialog">
+                            <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title">Compartir: {{ material.titulo }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="formCompartir{{ material.id }}">
-                                            <p>Selecciona los estudiantes con los que quieres compartir este material:</p>
-                                            {% if estudiantes %}
-                                            <div class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
-                                                {% for estudiante in estudiantes %}
-                                                <label class="list-group-item">
-                                                    <input class="form-check-input me-2" type="checkbox" 
-                                                           name="estudiante_ids" 
-                                                           value="{{ estudiante.id }}"
-                                                           {% if estudiante in material.estudiantes_compartidos %}checked{% endif %}>
+                                        <p><strong>Material compartido actualmente con:</strong></p>
+                                        {% if material.estudiantes_compartidos %}
+                                        <ul class="list-group mb-3">
+                                            {% for estudiante in material.estudiantes_compartidos %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="fas fa-user me-2"></i>
                                                     {{ estudiante.nombre }} ({{ estudiante.email }})
-                                                </label>
-                                                {% endfor %}
+                                                </span>
+                                                <form method="POST" action="{{ url_for('main.dejar_compartir_material', material_id=material.id, estudiante_id=estudiante.id) }}" 
+                                                      style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-times me-1"></i>Dejar de compartir
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Este material aún no está compartido con ningún estudiante.
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <hr>
+                                        
+                                        <p><strong>Compartir con un nuevo estudiante:</strong></p>
+                                        <form method="POST" action="{{ url_for('main.compartir_material_estudiante', material_id=material.id) }}">
+                                            {% set estudiantes_clase = [] %}
+                                            {% for clase in material.docente.clases %}
+                                                {% if clase.cliente not in estudiantes_clase %}
+                                                    {% set _ = estudiantes_clase.append(clase.cliente) %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            
+                                            {% if estudiantes_clase %}
+                                            <div class="mb-3">
+                                                <label for="estudiante_id_{{ material.id }}" class="form-label">Selecciona un estudiante:</label>
+                                                <select class="form-select" name="estudiante_id" id="estudiante_id_{{ material.id }}" required>
+                                                    <option value="">Seleccionar estudiante...</option>
+                                                    {% for estudiante in estudiantes_clase %}
+                                                    <option value="{{ estudiante.id }}">
+                                                        {{ estudiante.nombre }} - {{ estudiante.email }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <small class="form-text text-muted">
+                                                    Solo puedes compartir materiales con estudiantes que tienen clases contigo.
+                                                </small>
                                             </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-share-alt me-1"></i>Compartir Material
+                                            </button>
                                             {% else %}
                                             <div class="alert alert-warning">
-                                                No tienes estudiantes aún. Los estudiantes aparecerán aquí cuando reserven clases contigo.
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                No tienes estudiantes con clases confirmadas o completadas. 
+                                                Los estudiantes aparecerán aquí cuando reserven clases contigo.
                                             </div>
                                             {% endif %}
                                         </form>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="button" class="btn btn-primary" 
-                                                onclick="compartirMaterial({{ material.id }})">
-                                            <i class="fas fa-share-alt me-1"></i>Compartir
-                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
                             </div>
@@ -160,6 +205,7 @@
             <div class="text-center py-4">
                 <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                 <p class="text-muted">Aún no has subido ningún material PDF</p>
+                <p class="text-muted">Sube tu primer material usando el formulario de arriba.</p>
             </div>
             {% endif %}
         </div>
@@ -170,101 +216,48 @@
 
 {% block extra_js %}
 <script>
-// Subir PDF
-document.getElementById('formSubirPDF')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
+// Validar tamaño del archivo antes de submit
+document.getElementById('archivo')?.addEventListener('change', function() {
+    const file = this.files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
     
-    const formData = new FormData(this);
-    const btnSubir = document.getElementById('btnSubir');
-    const progressBar = document.getElementById('progressBar');
-    
-    // Validar tamaño del archivo
-    const archivo = document.getElementById('archivo').files[0];
-    if (archivo && archivo.size > 3 * 1024 * 1024) {
-        alert('El archivo excede el tamaño máximo de 3 MB');
-        return;
-    }
-    
-    btnSubir.disabled = true;
-    progressBar.style.display = 'block';
-    
-    try {
-        const response = await fetch('{{ url_for("main.subir_material") }}', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert('PDF subido correctamente');
-            location.reload();
-        } else {
-            alert(data.error || 'Error al subir el archivo');
-        }
-    } catch (error) {
-        alert('Error al subir el archivo: ' + error.message);
-    } finally {
-        btnSubir.disabled = false;
-        progressBar.style.display = 'none';
+    if (file && file.size > maxSize) {
+        alert('El archivo excede el tamaño máximo de 5 MB. Por favor selecciona un archivo más pequeño.');
+        this.value = '';
+        document.getElementById('btnSubir').disabled = true;
+    } else if (file) {
+        document.getElementById('btnSubir').disabled = false;
     }
 });
 
-// Compartir material
-async function compartirMaterial(materialId) {
-    const form = document.getElementById('formCompartir' + materialId);
-    const checkboxes = form.querySelectorAll('input[name="estudiante_ids"]:checked');
-    const estudianteIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+// Validación al enviar el formulario
+document.querySelector('form[action="{{ url_for("main.subir_material_docente") }}"]')?.addEventListener('submit', function(e) {
+    const archivo = document.getElementById('archivo').files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
     
-    if (estudianteIds.length === 0) {
-        alert('Debes seleccionar al menos un estudiante');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/docente/materiales/${materialId}/compartir`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ estudiante_ids: estudianteIds })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert('Material compartido correctamente');
-            location.reload();
-        } else {
-            alert(data.error || 'Error al compartir el material');
-        }
-    } catch (error) {
-        alert('Error al compartir el material: ' + error.message);
-    }
-}
-
-// Eliminar material
-async function eliminarMaterial(materialId) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este material? Esta acción no se puede deshacer.')) {
-        return;
+    if (!archivo) {
+        e.preventDefault();
+        alert('Por favor selecciona un archivo PDF');
+        return false;
     }
     
-    try {
-        const response = await fetch(`/docente/materiales/${materialId}/eliminar`, {
-            method: 'POST'
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert('Material eliminado correctamente');
-            location.reload();
-        } else {
-            alert(data.error || 'Error al eliminar el material');
-        }
-    } catch (error) {
-        alert('Error al eliminar el material: ' + error.message);
+    if (archivo.size > maxSize) {
+        e.preventDefault();
+        alert('El archivo excede el tamaño máximo de 5 MB');
+        return false;
     }
-}
+    
+    if (!archivo.name.toLowerCase().endsWith('.pdf')) {
+        e.preventDefault();
+        alert('Solo se permiten archivos PDF');
+        return false;
+    }
+    
+    // Deshabilitar botón para evitar envíos duplicados
+    document.getElementById('btnSubir').disabled = true;
+    document.getElementById('btnSubir').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Subiendo...';
+    
+    return true;
+});
 </script>
 {% endblock %}

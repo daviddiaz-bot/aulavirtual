@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - Admin - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-users me-2"></i>Gestión de Usuarios</h1>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin.usuarios') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="rol" class="form-label">Rol</label>
+                    <select class="form-select" id="rol" name="rol">
+                        <option value="">Todos los roles</option>
+                        <option value="admin" {% if request.args.get('rol') == 'admin' %}selected{% endif %}>Administrador</option>
+                        <option value="docente" {% if request.args.get('rol') == 'docente' %}selected{% endif %}>Docente</option>
+                        <option value="cliente" {% if request.args.get('rol') == 'cliente' %}selected{% endif %}>Cliente</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="buscar" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="buscar" name="buscar" 
+                           placeholder="Nombre o email..." value="{{ request.args.get('buscar', '') }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
+                    <a href="{{ url_for('admin.usuarios') }}" class="btn btn-secondary">
+                        <i class="fas fa-redo me-1"></i>Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Usuarios -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Usuarios Registrados 
+                <span class="badge bg-primary">{{ usuarios.total }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if usuarios.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>2FA</th>
+                            <th>Fecha Registro</th>
+                            <th>Último Acceso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios.items %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>
+                                <strong>{{ usuario.nombre }}</strong>
+                                {% if usuario.telefono %}
+                                <br><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ usuario.telefono }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if usuario.rol == 'admin' else 'success' if usuario.rol == 'docente' else 'primary' }}">
+                                    {{ usuario.rol|upper }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if usuario.activo else 'danger' }}">
+                                    {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.is_2fa_enabled %}
+                                <i class="fas fa-shield-alt text-success" title="2FA Habilitado"></i>
+                                {% else %}
+                                <i class="fas fa-shield-alt text-muted" title="2FA Deshabilitado"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% if usuario.ultimo_acceso %}
+                                {{ usuario.ultimo_acceso.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('admin.detalle_usuario', usuario_id=usuario.id) }}" 
+                                       class="btn btn-sm btn-info" title="Ver Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.activar_usuario', usuario_id=usuario.id) }}" 
+                                          style="display: inline;">
+                                        {% if usuario.activo %}
+                                        <button type="submit" class="btn btn-sm btn-warning" 
+                                                title="Desactivar"
+                                                onclick="return confirm('¿Desactivar este usuario?')">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                        {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success" 
+                                                title="Activar">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.resetear_password_usuario', usuario_id=usuario.id) }}" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                title="Resetear Contraseña"
+                                                onclick="return confirm('¿Resetear la contraseña de este usuario?')">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if usuarios.pages > 1 %}
+            <nav aria-label="Paginación de usuarios">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not usuarios.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.usuarios', page=usuarios.prev_num, rol=request.args.get('rol', ''), buscar=request.args.get('buscar', '')) }}">
+                            Anterior
+                        </a>
+                    </li>
+                    
+                    {% for page_num in usuarios.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == usuarios.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.usuarios', page=page_num, rol=request.args.get('rol', ''), buscar=request.args.get('buscar', '')) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <li class="page-item {% if not usuarios.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.usuarios', page=usuarios.next_num, rol=request.args.get('rol', ''), buscar=request.args.get('buscar', '')) }}">
+                            Siguiente
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No se encontraron usuarios con los filtros aplicados.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

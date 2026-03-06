@@ -940,3 +940,252 @@ def mis_materiales_estudiante():
     materiales = current_user.materiales_compartidos.filter(Material.tipo == 'pdf').order_by(Material.fecha_subida.desc()).all()
     
     return render_template('clases/materiales_estudiante.html', materiales=materiales)
+
+
+# ============================================================================
+# GESTIÓN DE MATERIALES - DOCENTES
+# ============================================================================
+
+@main.route('/docente/materiales')
+@login_required
+def mis_materiales_docente():
+    """Vista de materiales del docente"""
+    if current_user.rol != 'docente':
+        flash('Acceso no autorizado. Solo docentes pueden acceder.', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Perfil de docente no encontrado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    # Obtener materiales del docente
+    materiales = Material.query.filter_by(docente_id=docente.id, tipo='pdf').order_by(Material.fecha_subida.desc()).all()
+    
+    # Calcular límites
+    total_materiales = len(materiales)
+    puede_subir = total_materiales < 5
+    
+    return render_template('docentes/materiales.html', 
+                         materiales=materiales,
+                         total_materiales=total_materiales,
+                         puede_subir=puede_subir)
+
+
+@main.route('/docente/materiales/subir', methods=['POST'])
+@login_required
+def subir_material_docente():
+    """Subir material como docente"""
+    if current_user.rol != 'docente':
+        flash('Acceso no autorizado. Solo docentes pueden subir materiales.', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Perfil de docente no encontrado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    # Verificar límite de 5 materiales
+    total_materiales = Material.query.filter_by(docente_id=docente.id, tipo='pdf').count()
+    if total_materiales >= 5:
+        flash('Has alcanzado el límite máximo de 5 materiales. Elimina alguno para subir uno nuevo.', 'warning')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Obtener datos del formulario
+    titulo = request.form.get('titulo', '').strip()
+    descripcion = request.form.get('descripcion', '').strip()
+    
+    if not titulo:
+        flash('El título es obligatorio', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Verificar archivo
+    if 'archivo' not in request.files:
+        flash('No se seleccionó ningún archivo', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    archivo = request.files['archivo']
+    
+    if archivo.filename == '':
+        flash('No se seleccionó ningún archivo', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Validar extensión
+    if not archivo.filename.lower().endswith('.pdf'):
+        flash('Solo se permiten archivos PDF', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Validar tamaño (5MB = 5 * 1024 * 1024 bytes)
+    archivo.seek(0, os.SEEK_END)
+    tamanio_bytes = archivo.tell()
+    archivo.seek(0)
+    
+    MAX_SIZE = 5 * 1024 * 1024  # 5MB
+    if tamanio_bytes > MAX_SIZE:
+        flash('El archivo excede el tamaño máximo permitido de 5MB', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    try:
+        # Guardar archivo
+        filename = secure_filename(archivo.filename)
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        
+        # Crear directorio si no existe
+        upload_dir = os.path.join('app', 'static', 'uploads', 'materiales', str(docente.id))
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        filepath = os.path.join(upload_dir, unique_filename)
+        archivo.save(filepath)
+        
+        # Crear registro en base de datos
+        relative_path = os.path.join('uploads', 'materiales', str(docente.id), unique_filename)
+        
+        material = Material(
+            docente_id=docente.id,
+            titulo=titulo,
+            descripcion=descripcion,
+            tipo='pdf',
+            archivo_path=relative_path,
+            tamanio_kb=int(tamanio_bytes / 1024),
+            publico=False
+        )
+        
+        db.session.add(material)
+        db.session.commit()
+        
+        flash(f'Material "{titulo}" subido correctamente', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error subiendo material: {e}')
+        flash('Error al subir el material. Intenta nuevamente.', 'danger')
+    
+    return redirect(url_for('main.mis_materiales_docente'))
+
+
+@main.route('/docente/materiales/<int:material_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_material_docente(material_id):
+    """Eliminar material propio del docente"""
+    if current_user.rol != 'docente':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Perfil de docente no encontrado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    material = Material.query.get_or_404(material_id)
+    
+    # Verificar que el material pertenece al docente
+    if material.docente_id != docente.id:
+        flash('No tienes permiso para eliminar este material', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    try:
+        # Eliminar archivo físico
+        if material.archivo_path:
+            filepath = os.path.join('app', 'static', material.archivo_path)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        
+        # Eliminar de base de datos
+        db.session.delete(material)
+        db.session.commit()
+        
+        flash('Material eliminado correctamente', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error eliminando material: {e}')
+        flash('Error al eliminar el material', 'danger')
+    
+    return redirect(url_for('main.mis_materiales_docente'))
+
+
+@main.route('/docente/materiales/<int:material_id>/compartir', methods=['POST'])
+@login_required
+def compartir_material_estudiante(material_id):
+    """Compartir material con un estudiante"""
+    if current_user.rol != 'docente':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Perfil de docente no encontrado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    material = Material.query.get_or_404(material_id)
+    
+    # Verificar que el material pertenece al docente
+    if material.docente_id != docente.id:
+        flash('No tienes permiso para compartir este material', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Obtener ID del estudiante
+    estudiante_id = request.form.get('estudiante_id', type=int)
+    if not estudiante_id:
+        flash('Debes seleccionar un estudiante', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    estudiante = Usuario.query.get_or_404(estudiante_id)
+    
+    # Verificar que es un cliente
+    if estudiante.rol != 'cliente':
+        flash('Solo puedes compartir materiales con estudiantes', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Verificar que el estudiante ha tomado o tiene clases con el docente
+    clase_con_estudiante = Clase.query.filter(
+        Clase.docente_id == docente.id,
+        Clase.cliente_id == estudiante_id
+    ).first()
+    
+    if not clase_con_estudiante:
+        flash('Solo puedes compartir materiales con estudiantes que tienen clases contigo', 'warning')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    # Compartir material
+    if estudiante not in material.estudiantes_compartidos:
+        material.estudiantes_compartidos.append(estudiante)
+        db.session.commit()
+        flash(f'Material compartido con {estudiante.nombre}', 'success')
+    else:
+        flash(f'El material ya estaba compartido con {estudiante.nombre}', 'info')
+    
+    return redirect(url_for('main.mis_materiales_docente'))
+
+
+@main.route('/docente/materiales/<int:material_id>/dejar-compartir/<int:estudiante_id>', methods=['POST'])
+@login_required
+def dejar_compartir_material(material_id, estudiante_id):
+    """Dejar de compartir material con un estudiante"""
+    if current_user.rol != 'docente':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    docente = Docente.query.filter_by(usuario_id=current_user.id).first()
+    if not docente:
+        flash('Perfil de docente no encontrado', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    material = Material.query.get_or_404(material_id)
+    
+    # Verificar que el material pertenece al docente
+    if material.docente_id != docente.id:
+        flash('No tienes permiso para modificar este material', 'danger')
+        return redirect(url_for('main.mis_materiales_docente'))
+    
+    estudiante = Usuario.query.get_or_404(estudiante_id)
+    
+    # Dejar de compartir
+    if estudiante in material.estudiantes_compartidos:
+        material.estudiantes_compartidos.remove(estudiante)
+        db.session.commit()
+        flash(f'Material ya no compartido con {estudiante.nombre}', 'info')
+    else:
+        flash('El material no estaba compartido con este estudiante', 'warning')
+    
+    return redirect(url_for('main.mis_materiales_docente'))

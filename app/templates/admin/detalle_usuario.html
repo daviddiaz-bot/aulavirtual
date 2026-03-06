@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle Usuario - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user me-2"></i>Detalle de Usuario</h1>
+        <a href="{{ url_for('admin.usuarios') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Usuarios
+        </a>
+    </div>
+
+    <!-- Información del Usuario -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Nombre:</strong><br>
+                            {{ usuario.nombre }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong><br>
+                            {{ usuario.email }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Rol:</strong><br>
+                            <span class="badge bg-{{ 'danger' if usuario.rol == 'admin' else 'success' if usuario.rol == 'docente' else 'primary' }}">
+                                {{ usuario.rol|upper }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Teléfono:</strong><br>
+                            {{ usuario.telefono or 'No especificado' }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Estado:</strong><br>
+                            <span class="badge bg-{{ 'success' if usuario.activo else 'danger' }}">
+                                {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>2FA Habilitado:</strong><br>
+                            <span class="badge bg-{{ 'success' if usuario.is_2fa_enabled else 'secondary' }}">
+                                {{ 'Sí' if usuario.is_2fa_enabled else 'No' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Fecha de Registro:</strong><br>
+                            {{ usuario.fecha_registro.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Último Acceso:</strong><br>
+                            {{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_acceso else 'Nunca' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if stats %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if usuario.rol == 'cliente' %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-primary">{{ stats.total_clases }}</h3>
+                                    <p class="mb-0">Total de Clases</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-success">${{ stats.total_gastado }}</h3>
+                                    <p class="mb-0">Total Gastado</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% elif usuario.rol == 'docente' %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-primary">{{ stats.total_clases }}</h3>
+                                    <p class="mb-0">Total de Clases</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-success">${{ stats.total_ingresos }}</h3>
+                                    <p class="mb-0">Ingresos Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-warning">{{ stats.calificacion }}</h3>
+                                    <p class="mb-0">Calificación</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Acciones de Administrador</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Activar/Desactivar Usuario -->
+                    <form method="POST" action="{{ url_for('admin.activar_usuario', usuario_id=usuario.id) }}" class="mb-3">
+                        {% if usuario.activo %}
+                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('¿Desactivar este usuario?')">
+                            <i class="fas fa-ban me-1"></i>Desactivar Usuario
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-check me-1"></i>Activar Usuario
+                        </button>
+                        {% endif %}
+                    </form>
+
+                    <!-- Resetear Contraseña -->
+                    <form method="POST" action="{{ url_for('admin.resetear_password_usuario', usuario_id=usuario.id) }}" class="mb-3">
+                        <button type="submit" class="btn btn-warning w-100" onclick="return confirm('¿Resetear la contraseña de este usuario? Se enviará una nueva contraseña temporal por email.')">
+                            <i class="fas fa-key me-1"></i>Resetear Contraseña
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Información adicional -->
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Al resetear la contraseña, se generará una contraseña temporal y se enviará por email al usuario.
+                        </small>
+                    </div>
+
+                    {% if usuario.rol == 'docente' %}
+                    <hr>
+                    <a href="{{ url_for('admin.docentes') }}" class="btn btn-outline-info w-100">
+                        <i class="fas fa-chalkboard-teacher me-1"></i>Ver Panel de Docentes
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if usuario.rol == 'docente' %}
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info me-2"></i>Info de Docente</h5>
+                </div>
+                <div class="card-body">
+                    {% if usuario.docente %}
+                    <p><strong>Especialidad:</strong><br>{{ usuario.docente.especialidad or 'No especificada' }}</p>
+                    <p><strong>Precio/Hora:</strong><br>${{ usuario.docente.precio_hora }}</p>
+                    <p><strong>Verificado:</strong><br>
+                        <span class="badge bg-{{ 'success' if usuario.docente.verificado else 'warning' }}">
+                            {{ 'Sí' if usuario.docente.verificado else 'Pendiente' }}
+                        </span>
+                    </p>
+                    <p><strong>Total Clases:</strong><br>{{ usuario.docente.total_clases }}</p>
+                    <p><strong>Calificación:</strong><br>{{ usuario.docente.promedio_calificacion }} ⭐</p>
+                    {% else %}
+                    <p class="text-muted">No hay perfil de docente asociado</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

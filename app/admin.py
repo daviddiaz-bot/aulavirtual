@@ -184,6 +184,40 @@ def activar_usuario(usuario_id):
     return redirect(url_for('admin.detalle_usuario', usuario_id=usuario_id))
 
 
+@admin_bp.route('/usuarios/<int:usuario_id>/resetear-password', methods=['POST'])
+@login_required
+@admin_required
+def resetear_password_usuario(usuario_id):
+    """Resetear contraseña de un usuario (admin)"""
+    import secrets
+    from .email import send_email
+    
+    usuario = Usuario.query.get_or_404(usuario_id)
+    
+    # Generar nueva contraseña temporal
+    nueva_password = secrets.token_urlsafe(12)
+    
+    # Actualizar contraseña
+    usuario.set_password(nueva_password)
+    db.session.commit()
+    
+    # Enviar email con nueva contraseña
+    try:
+        send_email(
+            to=usuario.email,
+            subject='Restablecimiento de Contraseña - Aula Virtual',
+            template='email/reset_password_admin',
+            usuario=usuario,
+            nueva_password=nueva_password
+        )
+        flash(f'Contraseña restablecida correctamente. Se ha enviado un correo a {usuario.email} con la nueva contraseña.', 'success')
+    except Exception as e:
+        current_app.logger.error(f'Error enviando email de reseteo: {e}')
+        flash(f'Contraseña restablecida a: {nueva_password} (no se pudo enviar el email)', 'warning')
+    
+    return redirect(url_for('admin.detalle_usuario', usuario_id=usuario_id))
+
+
 @admin_bp.route('/docentes')
 @login_required
 @admin_required
