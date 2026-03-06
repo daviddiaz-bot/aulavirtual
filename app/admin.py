@@ -784,4 +784,9 @@ def detalle_material(material_id):
     """Ver detalles completos de un material"""
     material = Material.query.get_or_404(material_id)
     
+    # Verificar que el material tiene un docente asociado
+    if not material.docente:
+        flash('Este material no tiene un docente asociado. Por favor contacta al administrador.', 'warning')
+        return redirect(url_for('admin.materiales'))
+    
     return render_template('admin/detalle_material.html', material=material)
